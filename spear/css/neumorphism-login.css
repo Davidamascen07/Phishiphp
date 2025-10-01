@@ -1,0 +1,534 @@
+/* Neumorphism Login Form - Complete & Self-Contained */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #e0e5ec url('../images/fundoCyberPhishiX.jpg') center center;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.9; /* aumentado para espaçamento entre linhas */
+    position: relative;
+}
+
+/* Overlay para melhorar a legibilidade */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(224, 229, 236, 0.096);
+    z-index: -1;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: #e0e5ec;
+    border-radius: 30px;
+    padding: 60px 48px; /* mais espaçamento interno */
+    box-shadow: 
+        20px 20px 60px #000207,
+        -20px -20px 60px #ffffff09;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.login-card:hover {
+    /* transform: translateY(-5px); */
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 48px; /* espaço aumentado entre header e formulário */
+}
+
+.neu-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: #e0e5ec;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* box-shadow:  */
+        8px 8px 20px #bec3cf,
+        -8px -8px 20px #ffffff,
+        inset 0 0 0 #bec3cf,
+        inset 0 0 0 #ffffff;
+    transition: all 0.3s ease;
+}
+
+.neu-icon:hover {
+    /* box-shadow:  */
+        4px 4px 10px #bec3cf,
+        -4px -4px 10px #ffffff,
+        inset 4px 4px 10px #bec3cf,
+        inset -4px -4px 10px #ffffff;
+}
+
+.icon-inner {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c7293;
+}
+
+.icon-inner svg {
+    width: 100%;
+    height: 100%;
+}
+
+.login-header h2 {
+    color: #3d4468;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 12px; /* leve aumento para separar do subtítulo */
+}
+
+.login-header p {
+    color: #9499b7;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* Neumorphic Input Styles */
+.form-group {
+    margin-bottom: 36px; /* aumento do espaçamento entre campos */
+    position: relative;
+}
+
+.neu-input {
+    position: relative;
+    background: #e0e5ec;
+    border-radius: 15px;
+    box-shadow: 
+        inset 8px 8px 16px #bec3cf,
+        inset -8px -8px 16px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.neu-input:focus-within {
+    /* box-shadow:  */
+        inset 4px 4px 8px #bec3cf,
+        inset -4px -4px 8px #ffffff;
+}
+
+.neu-input input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 24px 28px; /* mais espaço vertical e horizontal */
+    padding-left: 60px; /* desloca para acomodar ícone e label */
+    color: #3d4468;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.neu-input input::placeholder {
+    color: transparent;
+}
+
+.neu-input label {
+    position: absolute;
+    left: 60px; /* ajustado para novo padding-left */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9499b7;
+    font-size: 16px;
+    font-weight: 400;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.neu-input input:focus + label,
+.neu-input input:not(:placeholder-shown) + label {
+    top: 8px;
+    font-size: 12px;
+    color: #6c7293;
+    transform: translateY(0);
+}
+
+.input-icon {
+    position: absolute;
+    left: 24px; /* ligeiro deslocamento para melhor alinhamento */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: #9499b7;
+    transition: all 0.3s ease;
+}
+
+.input-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.neu-input:focus-within .input-icon {
+    color: #6c7293;
+}
+
+/* Password Toggle */
+.password-group {
+    padding-right: 50px;
+}
+
+.neu-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #e0e5ec;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9499b7;
+    box-shadow: 
+        4px 4px 10px #bec3cf,
+        -4px -4px 10px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.neu-toggle:hover {
+    color: #6c7293;
+}
+
+.neu-toggle:active {
+    /* box-shadow:  */
+        inset 2px 2px 5px #bec3cf,
+        inset -2px -2px 5px #ffffff;
+}
+
+.neu-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.eye-closed {
+    display: none;
+}
+
+.neu-toggle.show-password .eye-open {
+    display: none;
+}
+
+.neu-toggle.show-password .eye-closed {
+    display: block;
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 42px; /* mais espaçamento antes do botão */
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.remember-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.remember-wrapper input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    color: #6c7293;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.neu-checkbox {
+    width: 22px;
+    height: 22px;
+    background: #e0e5ec;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        3px 3px 8px #bec3cf,
+        -3px -3px 8px #ffffff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.remember-wrapper input[type="checkbox"]:checked + .checkbox-label .neu-checkbox {
+    box-shadow: 
+        inset 2px 2px 5px #bec3cf,
+        inset -2px -2px 5px #ffffff;
+}
+
+.neu-checkbox svg {
+    width: 14px;
+    height: 14px;
+    color: #00c896;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.remember-wrapper input[type="checkbox"]:checked + .checkbox-label .neu-checkbox svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.forgot-link {
+    color: #6c7293;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+    color: #3d4468;
+}
+
+/* Neumorphic Button */
+.neu-button {
+    width: 100%;
+    background: #e0e5ec;
+    border: none;
+    border-radius: 15px;
+    padding: 18px 32px;
+    color: #3d4468;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 30px;
+    box-shadow: 
+        8px 8px 20px #bec3cf,
+        -8px -8px 20px #ffffff;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.neu-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.neu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        12px 12px 30px #bec3cf,
+        -12px -12px 30px #ffffff;
+}
+
+.neu-button:hover::before {
+    left: 100%;
+}
+
+.neu-button:active {
+    transform: translateY(0);
+    box-shadow: 
+        inset 4px 4px 10px #bec3cf,
+        inset -4px -4px 10px #ffffff;
+}
+
+.btn-text {
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.neu-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #bec3cf;
+    border-top: 3px solid #6c7293;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.neu-button.loading .btn-text {
+    opacity: 0;
+}
+
+.neu-button.loading .btn-loader {
+    opacity: 1;
+}
+
+/* Error States */
+.error-message {
+    color: #ff3b5c;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 12px; /* mais espaço entre input e mensagem de erro */
+    margin-left: 20px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.error-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.form-group.error .neu-input {
+    box-shadow: 
+        inset 8px 8px 16px #ffb8c4,
+        inset -8px -8px 16px #ffffff,
+        0 0 0 2px #ff3b5c;
+}
+
+/* Recovery Form */
+.recovery-form {
+    display: none;
+}
+
+.recovery-form.show {
+    display: block;
+}
+
+.recovery-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.recovery-header h3 {
+    color: #3d4468;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.recovery-header p {
+    color: #9499b7;
+    font-size: 14px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #6c7293;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.back-link:hover {
+    color: #3d4468;
+}
+
+.back-link svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    body {
+        padding: 16px;
+    }
+    
+    .login-card {
+        padding: 40px 28px; /* ajuste responsivo mantendo espaçamento maior */
+        border-radius: 20px;
+    }
+    
+    .login-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .neu-input input {
+        padding: 18px 20px;
+        padding-left: 54px;
+    }
+    
+    .neu-input label {
+        left: 54px;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes gentleShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Utilities */
+.text-center { text-align: center; }
+.text-danger { color: #ff3b5c; }
+.text-success { color: #00c896; }
+.mb-3 { margin-bottom: 1rem; }
+.mt-3 { margin-top: 1rem; }

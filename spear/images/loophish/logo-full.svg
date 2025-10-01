@@ -1,0 +1,25 @@
+<!-- LooPhish SVG Logo -->
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3498DB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Loop Symbol -->
+  <circle cx="25" cy="30" r="15" stroke="url(#logoGradient)" stroke-width="3" fill="none"/>
+  <circle cx="25" cy="30" r="8" fill="url(#logoGradient)"/>
+  
+  <!-- Security Shield -->
+  <path d="M45 15 L55 15 L55 25 L50 35 L45 25 Z" fill="url(#logoGradient)" stroke="#2C3E50" stroke-width="1"/>
+  <circle cx="50" cy="22" r="3" fill="white"/>
+  
+  <!-- Text: LooPhish -->
+  <text x="70" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#logoGradient)">
+    LooPhish
+  </text>
+  <text x="70" y="40" font-family="Arial, sans-serif" font-size="10" fill="#7F8C8D">
+    Security Training Platform
+  </text>
+</svg>
