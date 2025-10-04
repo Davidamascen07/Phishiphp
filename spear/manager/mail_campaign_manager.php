@@ -65,14 +65,15 @@ function saveCampaignList($conn, &$POSTJ){
 	$campaign_data = json_encode($POSTJ['campaign_data']);
 	$scheduled_time = $POSTJ['scheduled_time'];
 	$camp_status = $POSTJ['camp_status'];
+	$current_client_id = getCurrentClientId();
 
 	if(checkCampaignListIdExist($conn,$campaign_id)){
-		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_list SET campaign_name=?, campaign_data=?, scheduled_time=?, stop_time=null, camp_status=?, camp_lock=0 WHERE campaign_id=?");
-		$stmt->bind_param('sssss', $campaign_name,$campaign_data,$scheduled_time,$camp_status,$campaign_id);
+		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_list SET campaign_name=?, campaign_data=?, scheduled_time=?, stop_time=null, camp_status=?, camp_lock=0 WHERE campaign_id=? AND client_id=?");
+		$stmt->bind_param('ssssss', $campaign_name,$campaign_data,$scheduled_time,$camp_status,$campaign_id,$current_client_id);
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_list(campaign_id,campaign_name,campaign_data,date,scheduled_time,camp_status,camp_lock) VALUES(?,?,?,?,?,?,0)");
-		$stmt->bind_param('ssssss', $campaign_id,$campaign_name,$campaign_data,$GLOBALS['entry_time'],$scheduled_time,$camp_status);
+		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_list(campaign_id,client_id,campaign_name,campaign_data,date,scheduled_time,camp_status,camp_lock) VALUES(?,?,?,?,?,?,?,0)");
+		$stmt->bind_param('sssssss', $campaign_id,$current_client_id,$campaign_name,$campaign_data,$GLOBALS['entry_time'],$scheduled_time,$camp_status);
 	}
 	
 
@@ -88,10 +89,14 @@ function saveCampaignList($conn, &$POSTJ){
 function getCampaignList($conn){
 	$resp = [];
 	$DTime_info = getTimeInfo($conn);
+	$current_client_id = getCurrentClientId();
 
-	$result = mysqli_query($conn, "SELECT campaign_id,campaign_name,campaign_data,date,scheduled_time,stop_time,camp_status FROM tb_core_mailcamp_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$stmt = $conn->prepare("SELECT campaign_id,campaign_name,campaign_data,date,scheduled_time,stop_time,camp_status FROM tb_core_mailcamp_list WHERE client_id = ?");
+	$stmt->bind_param('s', $current_client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result && $result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["campaign_data"] = json_decode($row["campaign_data"]);	//avoid double json encoding
 			$row['date'] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
 			$row['scheduled_time'] = getInClientTime_FD($DTime_info,$row['scheduled_time'],null,'d-m-Y h:i A');
@@ -133,8 +138,9 @@ function getCampaignFromCampaignListId($conn, $campaign_id){
 	$resp['live_mcamp_data']['timestamp_conv'] = $scatter_data_mail_full['timestamp_conv'];
 
 	//-------------------
-	$stmt = $conn->prepare("SELECT campaign_name,campaign_data,date,scheduled_time,camp_status FROM tb_core_mailcamp_list WHERE campaign_id = ?");
-	$stmt->bind_param("s", $campaign_id);
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT campaign_name,campaign_data,date,scheduled_time,camp_status FROM tb_core_mailcamp_list WHERE campaign_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $campaign_id, $current_client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($row = $result->fetch_assoc()){
@@ -151,8 +157,9 @@ function getCampaignFromCampaignListId($conn, $campaign_id){
 }
 
 function deleteMailCampaignFromCampaignId($conn,$campaign_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_list WHERE campaign_id = ?");
-	$stmt->bind_param("s", $campaign_id);
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_list WHERE campaign_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $campaign_id, $current_client_id);
 	$stmt->execute();
 	if($stmt->affected_rows != 0){
 		echo json_encode(['result' => 'success']);	
@@ -176,7 +183,7 @@ function makeCopyMailCampaignList($conn, $old_campaign_id, $new_campaign_id, $ne
 }
 
 function pullMailCampaignFieldData($conn){
-	$resp;
+	$resp = [];
 	$result = mysqli_query($conn, "SELECT user_group_id,user_group_name FROM tb_core_mailcamp_user_group");
 	if(mysqli_num_rows($result) > 0){
 		$resp['user_group'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -332,7 +339,7 @@ function multi_get_mcampinfo_from_mcamp_list_id_get_live_mcamp_data($conn, $POST
 		$colSortString = 'ORDER BY '.$columnName.' '.$columnSortOrder;
 
 	$stmt = $conn->prepare("SELECT COUNT(*) FROM tb_data_mailcamp_live WHERE campaign_id=?");
-	$stmt->bind_param("s", $tracker_id);
+	$stmt->bind_param("s", $campaign_id);
 	$stmt->execute();
 	$row = $stmt->get_result()->fetch_row();
 	$totalRecords = $row[0];

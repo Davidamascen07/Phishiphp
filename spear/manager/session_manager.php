@@ -241,4 +241,60 @@ function terminateSession($redirection=true){
 		die();
 	}
 }
+
+// ------------------ Client context helpers ------------------
+/**
+ * Retorna o client_id atualmente ativo na sessão.
+ * Se não houver client setado, retorna 'default_org'.
+ */
+function getCurrentClientId(){
+	if (isset($_SESSION['client_id']) && !empty($_SESSION['client_id']))
+		return $_SESSION['client_id'];
+
+	// Caso exista cookie de cliente ativo, usa ele
+	if (isset($_COOKIE['active_client']) && !empty($_COOKIE['active_client']))
+		return $_COOKIE['active_client'];
+
+	return 'default_org';
+}
+
+/**
+ * Define o client ativo no contexto de sessão e cookie.
+ */
+function setClientContext($clientId){
+	if (empty($clientId))
+		return false;
+
+	$_SESSION['client_id'] = $clientId;
+	// Definir cookie para persistência do cliente ativo (escopo /)
+	setcookie('active_client', $clientId, ["path" => "/", "SameSite" => "Strict", "HttpOnly" => false]);
+	return true;
+}
+
+/**
+ * Retorna a lista de clientes acessíveis pelo usuário atual.
+ * Implementação básica: retorna todos os clientes ativos.
+ * Pode ser refinada posteriormente para retornar somente os clientes do usuário.
+ */
+function getUserAccessibleClients(){
+	global $conn;
+	$clients = [];
+	if (!isset($conn))
+		return $clients;
+
+	try{
+		$stmt = $conn->prepare("SELECT client_id, client_name FROM tb_clients WHERE status = 1 ORDER BY client_name ASC");
+		$stmt->execute();
+		$result = $stmt->get_result();
+		while($row = $result->fetch_assoc()){
+			$clients[] = $row;
+		}
+		$stmt->close();
+	}
+	catch (Exception $e){
+		// em caso de erro, retorna array vazio
+	}
+
+	return $clients;
+}
 ?>

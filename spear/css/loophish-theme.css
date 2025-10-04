@@ -1,0 +1,490 @@
+/* Fix: forçar cor do texto nas células do corpo das tabelas (evita texto branco sobre fundo claro) */
+.table tbody td,
+table.dataTable tbody td,
+.dataTables_wrapper table tbody td {
+    color: #2c3e50 !important; /* tom escuro azul/ cinza legível */
+}
+
+/* garantir que links e botões dentro da tabela assumam a cor do texto */
+.table tbody td a,
+.dataTables_wrapper table tbody td a,
+.table tbody td .btn,
+.dataTables_wrapper table tbody td .btn {
+    color: inherit;
+}
+
+/* Se houver badges/labels com fundo claro, ajustar contraste do texto */
+.table tbody td .badge,
+.dataTables_wrapper table tbody td .badge {
+    color: #fff !important;
+}
+
+/* LooPhish Modern Theme */
+:root {
+    --primary-color: #0c0c0cff;
+    --secondary-color: #3498DB;
+    --accent-color: #E74C3C;
+    --success-color: #27AE60;
+    --warning-color: #F39C12;
+    --info-color: #17A2B8;
+    --dark-color: #1A252F;
+    --light-color: #ECF0F1;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* Modern Card Design */
+.modern-card {
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    border: none;
+    transition: var(--transition);
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 1.0);
+
+}
+
+.modern-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Updated Dashboard Cards */
+.dashboard-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: var(--border-radius);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+}
+
+.dashboard-card .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.dashboard-card h3 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-card p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* Modern Sidebar */
+.left-sidebar {
+    background: var(--dark-color);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 1.0);
+}
+
+.sidebar-nav ul li a {
+    color: #BDC3C7;
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    margin: 2px 10px;
+    transition: var(--transition);
+}
+
+.sidebar-nav ul li a:hover {
+    background: var(--secondary-color);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar-nav ul li a.active {
+    background: var(--secondary-color);
+    color: white;
+}
+
+/* Modern Topbar */
+.topbar {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.topbar .navbar-brand {
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+/* Modern Buttons */
+.btn-modern {
+    border-radius: var(--border-radius);
+    padding: 10px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+    border: none;
+}
+
+.btn-modern-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.btn-modern-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.btn-modern-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #2ECC71 100%);
+    color: white;
+}
+
+.btn-modern-danger {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #C0392B 100%);
+    color: white;
+}
+
+/* Modern Forms */
+.form-control-modern {
+    border: 2px solid #E0E6ED;
+    border-radius: var(--border-radius);
+    padding: 6px 15px;
+    transition: var(--transition);
+    background: #F8F9FA;
+}
+
+.form-control-modern:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    background: white;
+}
+
+/* Modern Tables */
+.table-modern {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+}
+
+.table-modern thead th {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+}
+
+.table-modern tbody tr {
+    transition: var(--transition);
+}
+
+.table-modern tbody tr:hover {
+    background: #F8F9FA;
+    transform: scale(1.01);
+}
+
+
+
+/* Modern Modal */
+.modal-modern .modal-content {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-modern .modal-header {
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active {
+    background: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+}
+
+.status-inactive {
+    background: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+.status-pending {
+    background: var(--warning-color);
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.3);
+}
+
+/* Modern Progress Bars */
+.progress-modern {
+    height: 8px;
+    border-radius: 4px;
+    background: #E9ECEF;
+    overflow: hidden;
+}
+
+.progress-modern .progress-bar {
+    background: linear-gradient(90deg, var(--secondary-color) 0%, var(--success-color) 100%);
+    transition: width 0.6s ease;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 2rem;
+    }
+    
+    .sidebar-nav ul li a {
+        padding: 10px 15px;
+        margin: 1px 5px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .modern-card {
+        background: #fdfdfd;
+        color: rgb(26, 24, 24);
+    }
+    
+    .form-control-modern {
+        background: #dcdce4;
+        color: rgb(14, 13, 13);
+        border-color: #4A5F7A;
+    }
+}
+
+/* Training Module Specific Styles */
+.training-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--secondary-color);
+    transition: var(--transition);
+}
+
+.training-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.training-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.training-badge {
+    background: var(--secondary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Client Management Styles */
+.client-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.client-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.client-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+/* Certificate Styles */
+.certificate-preview {
+    background: white;
+    border: 2px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+}
+
+.certificate-seal {
+    width: 60px;
+    height: 60px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+/* Gamification Styles */
+.ranking-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.ranking-position {
+    background: var(--secondary-color);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.ranking-position.first {
+    background: #FFD700;
+    color: var(--dark-color);
+}
+
+.ranking-position.second {
+    background: #C0C0C0;
+    color: var(--dark-color);
+}
+
+.ranking-position.third {
+    background: #CD7F32;
+    color: white;
+}
+
+.score-badge {
+    background: var(--success-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Layout fixes: keep header and left sidebar fixed and let page content adapt */
+:root {
+    --lp-header-height: 64px; /* adjust if your header is taller */
+    --lp-sidebar-width: auto; /* default sidebar width used in style.min.css */
+    --lp-sidebar-mini-width: 65px; /* mini sidebar width */
+}
+
+/* Fix topbar/header */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--lp-header-height);
+    z-index: 1050; /* sit above content */
+}
+
+/* Fix left sidebar under the header */
+#main-wrapper .left-sidebar {
+    position: fixed;
+    top: var(--lp-header-height);
+    left: 0;
+    bottom: 0;
+    width: var(--lp-sidebar-width);
+    z-index: 1040;
+    overflow-y: auto;
+}
+
+/* Ensure page-wrapper content is shifted to the right and below the fixed header */
+#main-wrapper .page-wrapper {
+    /* margin-left: var(--lp-sidebar-width) !important; reserve space for sidebar */
+    margin-top: var(--lp-header-height) !important; /* reserve space for header */
+    position: relative;
+    z-index: 1;
+}
+
+/* If mini-sidebar is active, reduce reserved space accordingly (keeps parity with existing scripts) */
+#main-wrapper.mini-sidebar .left-sidebar {
+    width: var(--lp-sidebar-mini-width);
+}
+#main-wrapper.mini-sidebar .page-wrapper {
+    margin-left: var(--lp-sidebar-mini-width) !important;
+}
+
+/* On small screens the sidebar should slide off and content use full width */
+@media (max-width: 767px) {
+    .topbar { position: fixed; }
+    #main-wrapper .left-sidebar { left: -250px; /* hidden by default */ }
+    #main-wrapper.show-sidebar .left-sidebar { left: 0; }
+    #main-wrapper .page-wrapper { margin-left: 0 !important; margin-top: var(--lp-header-height) !important; }
+}
+
+/* Small tweak: ensure charts and cards don't get hidden below header */
+.page-wrapper .container-fluid, .page-wrapper .container {
+    padding-top: 12px; /* extra breathing room under fixed header */
+}

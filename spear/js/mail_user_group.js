@@ -290,12 +290,20 @@ function getUserGroupFromGroupId(id) {
                     return JSON.stringify(d);
                 },
             dataSrc: function ( resp ){
+                // Verificar se resp.data existe, se não, criar array vazio
+                if (!resp.data || !Array.isArray(resp.data)) {
+                    resp.data = [];
+                }
+                
                 for ( var i=0, ien=resp.data.length ; i<ien ; i++ ) {
                     resp.data[i]['sn'] = i+1;
                     resp.data[i]['action'] = action_items;
                 }
-                $('#user_group_name').val(resp.user_group_name);
-                $('#Modal_export_file_name').val(resp.user_group_name);
+                
+                // Definir nome do grupo mesmo se não houver dados
+                var groupName = resp.user_group_name || '';
+                $('#user_group_name').val(groupName);
+                $('#Modal_export_file_name').val(groupName);
                 return resp.data
             }
         },

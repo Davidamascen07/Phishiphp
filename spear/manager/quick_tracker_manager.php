@@ -38,28 +38,43 @@ if (isset($_POST)) {
 function saveQuickTracker($conn, &$POSTJ) { 
 	$tracker_name = $POSTJ['quick_tracker_name'];
 	$tracker_id = $POSTJ['tracker_id'];
+	$client_id = getCurrentClientId();
 
-	if(checkAnIDExist($conn,$tracker_id,'tracker_id','tb_core_quick_tracker_list')){
-		$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET tracker_name = ?, date =? WHERE tracker_id=?");
-		$stmt->bind_param('sss', $tracker_name,$GLOBALS['entry_time'], $tracker_id);
+	// Verificar se existe o tracker para este cliente
+	$stmt_check = $conn->prepare("SELECT COUNT(*) FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt_check->bind_param('ss', $tracker_id, $client_id);
+	$stmt_check->execute();
+	$result = $stmt_check->get_result();
+	$exists = $result->fetch_row()[0] > 0;
+	$stmt_check->close();
+
+	if($exists){
+		$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET tracker_name = ?, date = ? WHERE tracker_id = ? AND client_id = ?");
+		$stmt->bind_param('ssss', $tracker_name, $GLOBALS['entry_time'], $tracker_id, $client_id);
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_quick_tracker_list(tracker_id,tracker_name,date) VALUES(?,?,?)");
-		$stmt->bind_param('sss', $tracker_id,$tracker_name,$GLOBALS['entry_time']);
+		$stmt = $conn->prepare("INSERT INTO tb_core_quick_tracker_list(tracker_id, tracker_name, date, client_id) VALUES(?,?,?,?)");
+		$stmt->bind_param('ssss', $tracker_id, $tracker_name, $GLOBALS['entry_time'], $client_id);
 	}
 	if ($stmt->execute() === TRUE)
 		echo json_encode(['result' => 'success']);	
 	else 
 		echo json_encode(['result' => 'failed', 'error' => 'Error saving data']);	
+	$stmt->close();
 }
 
 function getQuickTrackerList($conn){	
 	$DTime_info = getTimeInfo($conn);
 	$resp = [];
+	$client_id = getCurrentClientId();
 
-	$result = mysqli_query($conn, "SELECT tracker_id,tracker_name,date,start_time,stop_time,active FROM tb_core_quick_tracker_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$stmt = $conn->prepare("SELECT tracker_id,tracker_name,date,start_time,stop_time,active FROM tb_core_quick_tracker_list WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	
+	if($result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row['date'] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
 			$row['start_time'] = getInClientTime_FD($DTime_info,$row['start_time'],null,'d-m-Y h:i A');
 			$row['stop_time'] = getInClientTime_FD($DTime_info,$row['stop_time'],null,'d-m-Y h:i A');
@@ -69,11 +84,13 @@ function getQuickTrackerList($conn){
 	}
 	else
 		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 
 function deleteQuickTracker($conn, $tracker_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_quick_tracker_list WHERE tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 
 	if($stmt->affected_rows != 0)
@@ -84,18 +101,20 @@ function deleteQuickTracker($conn, $tracker_id){
 }
 
 function pauseStopQuickTrackerTracking($conn, $tracker_id, $active){	
+	$client_id = getCurrentClientId();
+	
 	if($active == false){ //stopping
-		$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=?, stop_time=? WHERE tracker_id=?");
-		$stmt->bind_param('sss', $active,$GLOBALS['entry_time'],$tracker_id);
+		$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=?, stop_time=? WHERE tracker_id=? AND client_id=?");
+		$stmt->bind_param('ssss', $active,$GLOBALS['entry_time'],$tracker_id, $client_id);
 	}
 	else
 		if(trackerStartedPreviously($conn,$tracker_id) == true){
-			$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=?  WHERE tracker_id=?");
-			$stmt->bind_param('ss', $active,$tracker_id);
+			$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=? WHERE tracker_id=? AND client_id=?");
+			$stmt->bind_param('sss', $active,$tracker_id, $client_id);
 		}
 		else{
-			$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=?, start_time=? WHERE tracker_id=?");
-			$stmt->bind_param('sss', $active,$GLOBALS['entry_time'],$tracker_id);
+			$stmt = $conn->prepare("UPDATE tb_core_quick_tracker_list SET active=?, start_time=? WHERE tracker_id=? AND client_id=?");
+			$stmt->bind_param('ssss', $active,$GLOBALS['entry_time'],$tracker_id, $client_id);
 		}
 
 	if ($stmt->execute() === TRUE){
@@ -118,8 +137,9 @@ function deleteQuickTrackerData($conn, $tracker_id){
 //---------------------------Start report section----------------
 function getQuickTrackerFromId($conn,$tracker_id){
     $DTime_info = getTimeInfo($conn);
-	$stmt = $conn->prepare("SELECT * FROM tb_core_quick_tracker_list WHERE tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT * FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows != 0){
@@ -149,6 +169,24 @@ function getQuickTrackerData($conn, &$POSTJ){
 	$tb_data_single = $POSTJ['tb_data_single'];
 	$arr_filtered = [];
 	$DTime_info = getTimeInfo($conn);
+	$client_id = getCurrentClientId();
+
+	// Verificar se o tracker pertence ao cliente atual
+	$stmt_verify = $conn->prepare("SELECT COUNT(*) FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt_verify->bind_param("ss", $tracker_id, $client_id);
+	$stmt_verify->execute();
+	$tracker_exists = $stmt_verify->get_result()->fetch_row()[0] > 0;
+	$stmt_verify->close();
+
+	if (!$tracker_exists) {
+		echo json_encode([
+			"draw" => intval($draw),
+			"recordsTotal" => 0,
+			"recordsFiltered" => 0,
+			"data" => []
+		]);
+		return;
+	}
 
 	if (!in_array($columnName, ['rid','public_ip','ip_info','user_agent','mail_client','platform','all_headers','time']))	//should be db column name
 	    $columnName = '';	
@@ -215,6 +253,19 @@ function getQuickTrackerData($conn, &$POSTJ){
 function downloadReport($conn,$tracker_id,$selected_col,$dic_all_col,$file_name,$file_format){
 	$arr_odata=[];
 	$DTime_info = getTimeInfo($conn);
+	$client_id = getCurrentClientId();
+
+	// Verificar se o tracker pertence ao cliente atual
+	$stmt_verify = $conn->prepare("SELECT COUNT(*) FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt_verify->bind_param("ss", $tracker_id, $client_id);
+	$stmt_verify->execute();
+	$tracker_exists = $stmt_verify->get_result()->fetch_row()[0] > 0;
+	$stmt_verify->close();
+
+	if (!$tracker_exists) {
+		echo json_encode(['error' => 'Access denied']);
+		return;
+	}
 
 	$stmt = $conn->prepare("SELECT * FROM tb_data_quick_tracker_live WHERE tracker_id=?");
 	$stmt->bind_param("s", $tracker_id);
@@ -285,10 +336,12 @@ function downloadReport($conn,$tracker_id,$selected_col,$dic_all_col,$file_name,
 }
 //---------------------------End  report section----------------
 function trackerStartedPreviously($conn,$tracker_id){
-	$stmt = $conn->prepare("SELECT start_time FROM tb_core_quick_tracker_list WHERE tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT start_time FROM tb_core_quick_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 	$row = $stmt->get_result()->fetch_assoc();
+	$stmt->close();
 	
 	if($row['start_time'] == "")
 		return false;

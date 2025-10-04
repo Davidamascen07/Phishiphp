@@ -1,6 +1,31 @@
 var globalModalValue = nextRandomId ='';
 var g_deny_navigation = null;
-var cookie_c_data = JSON.parse(atob(decodeURIComponent(Cookies.get('c_data'))));
+var cookie_c_data = null;
+
+// Função para obter cookies sem biblioteca externa
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+// Inicializar cookie_c_data de forma segura
+try {
+    const cookieData = getCookie('c_data');
+    if (cookieData) {
+        cookie_c_data = JSON.parse(atob(decodeURIComponent(cookieData)));
+    } else {
+        cookie_c_data = { name: 'Usuário', last_login: 'N/A', timezone: 'UTC', dp_name: '1' };
+    }
+} catch (e) {
+    console.warn('Erro ao processar cookie c_data:', e);
+    cookie_c_data = { name: 'Usuário', last_login: 'N/A', timezone: 'UTC', dp_name: '1' };
+}
 
 $(function() {
     checkSniperPhishProcess();

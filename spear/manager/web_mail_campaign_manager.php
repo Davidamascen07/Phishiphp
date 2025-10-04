@@ -48,8 +48,9 @@ if (isset($_POST)) {
 //----------------------------------------------------------------------
 function getWebMailTrackerFromId($conn, $campaign_id, $tracker_id){
 	$DTime_info = getTimeInfo($conn);
-	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_list WHERE campaign_id = ?");
-	$stmt->bind_param("s", $campaign_id);
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_list WHERE campaign_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $campaign_id, $current_client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows > 0){
@@ -80,10 +81,14 @@ function getWebMailTrackerFromId($conn, $campaign_id, $tracker_id){
 function getCampaignListWebMail($conn){
 	$resp = [];
 	$DTime_info = getTimeInfo($conn);
+	$current_client_id = getCurrentClientId();
 
-	$result = mysqli_query($conn, "SELECT campaign_id,campaign_name,campaign_data,date,scheduled_time,camp_status FROM tb_core_mailcamp_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$stmt = $conn->prepare("SELECT campaign_id,campaign_name,campaign_data,date,scheduled_time,camp_status FROM tb_core_mailcamp_list WHERE client_id = ?");
+	$stmt->bind_param('s', $current_client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result && $result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["campaign_data"] = json_decode($row["campaign_data"]);	
 			$row['date'] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
         	array_push($resp,$row);

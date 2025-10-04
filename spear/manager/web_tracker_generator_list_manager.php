@@ -50,14 +50,23 @@ function saveWebTracker($conn, &$POSTJ) {
 	$tracker_id = $POSTJ['tracker_id'];
 	$content_html = json_encode($tracker_code_output["web_forms_code"]);
 	$content_js = $tracker_code_output["js_tracker"];
+	$client_id = getCurrentClientId();
 
-	if(checkAnIDExist($conn,$tracker_id,'tracker_id','tb_core_web_tracker_list')){
-		$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET tracker_name=?, content_html=?, content_js=?, tracker_step_data=?, active=? WHERE tracker_id=?");
-		$stmt->bind_param('ssssss', $tracker_name,$content_html,$content_js,$tracker_step_data_string,$active,$tracker_id);
+	// Verificar se existe o tracker para este cliente
+	$stmt_check = $conn->prepare("SELECT COUNT(*) FROM tb_core_web_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt_check->bind_param('ss', $tracker_id, $client_id);
+	$stmt_check->execute();
+	$result = $stmt_check->get_result();
+	$exists = $result->fetch_row()[0] > 0;
+	$stmt_check->close();
+
+	if($exists){
+		$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET tracker_name=?, content_html=?, content_js=?, tracker_step_data=?, active=? WHERE tracker_id=? AND client_id=?");
+		$stmt->bind_param('sssssss', $tracker_name,$content_html,$content_js,$tracker_step_data_string,$active,$tracker_id,$client_id);
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_web_tracker_list(tracker_id,tracker_name,content_html,content_js,tracker_step_data,active,date) VALUES(?,?,?,?,?,?,?)");
-		$stmt->bind_param('sssssss', $tracker_id,$tracker_name,$content_html,$content_js,$tracker_step_data_string,$active,$GLOBALS['entry_time']);
+		$stmt = $conn->prepare("INSERT INTO tb_core_web_tracker_list(tracker_id,tracker_name,content_html,content_js,tracker_step_data,active,date,client_id) VALUES(?,?,?,?,?,?,?,?)");
+		$stmt->bind_param('ssssssss', $tracker_id,$tracker_name,$content_html,$content_js,$tracker_step_data_string,$active,$GLOBALS['entry_time'],$client_id);
 	}
 
 	if ($stmt->execute() === TRUE){
@@ -66,14 +75,21 @@ function saveWebTracker($conn, &$POSTJ) {
 	}
 	else 
 		echo json_encode(['result' => 'failed', 'error' => 'Error saving data']);	
+	$stmt->close();
 }
 
 function getWebTrackerList($conn){	
 	$resp=[];
 	$DTime_info = getTimeInfo($conn);
-	$result = mysqli_query($conn, "SELECT tracker_id,tracker_name,tracker_step_data,date,start_time,stop_time,active FROM tb_core_web_tracker_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$client_id = getCurrentClientId();
+
+	$stmt = $conn->prepare("SELECT tracker_id,tracker_name,tracker_step_data,date,start_time,stop_time,active FROM tb_core_web_tracker_list WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+
+	if($result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row['tracker_step_data'] = json_decode($row["tracker_step_data"]);	
 			$row['date'] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
 			$row['start_time'] = getInClientTime_FD($DTime_info,$row['start_time'],null,'d-m-Y h:i A');
@@ -84,12 +100,14 @@ function getWebTrackerList($conn){
 	}
 	else
 		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 
 function getWebTrackerFromId($conn, $tracker_id){	
 	$DTime_info = getTimeInfo($conn);
-	$stmt = $conn->prepare("SELECT * FROM tb_core_web_tracker_list where tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT * FROM tb_core_web_tracker_list where tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows != 0){
@@ -106,8 +124,9 @@ function getWebTrackerFromId($conn, $tracker_id){
 }
 
 function deleteWebTracker($conn, $tracker_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_web_tracker_list WHERE tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_web_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 	if($stmt->affected_rows != 0)
 		deleteWebTrackerData($conn,$tracker_id);
@@ -117,8 +136,9 @@ function deleteWebTracker($conn, $tracker_id){
 }
 
 function makeCopyWebTracker($conn, $old_tracker_id, $new_tracker_id, $new_tracker_name){
-	$stmt = $conn->prepare("INSERT INTO tb_core_web_tracker_list (tracker_id,tracker_name,content_html,content_js,tracker_step_data,date,active) SELECT ?, ?, content_html,content_js,tracker_step_data,?,0 FROM tb_core_web_tracker_list WHERE tracker_id=?");
-	$stmt->bind_param("ssss", $new_tracker_id, $new_tracker_name, $GLOBALS['entry_time'], $old_tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("INSERT INTO tb_core_web_tracker_list (tracker_id,tracker_name,content_html,content_js,tracker_step_data,date,active,client_id) SELECT ?, ?, content_html,content_js,tracker_step_data,?,0,client_id FROM tb_core_web_tracker_list WHERE tracker_id=? AND client_id=?");
+	$stmt->bind_param("sssss", $new_tracker_id, $new_tracker_name, $GLOBALS['entry_time'], $old_tracker_id, $client_id);
 	
 	if($stmt->execute() === TRUE){
 		echo(json_encode(['result' => 'success']));	
@@ -129,26 +149,33 @@ function makeCopyWebTracker($conn, $old_tracker_id, $new_tracker_id, $new_tracke
 }
 
 function getWebTrackerListForModal($conn){	
-	$result = mysqli_query($conn, "SELECT tracker_id,tracker_name,date FROM tb_core_web_tracker_list");
-	if(mysqli_num_rows($result) > 0)
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT tracker_id,tracker_name,date FROM tb_core_web_tracker_list WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result->num_rows > 0)
 		echo json_encode(mysqli_fetch_all($result, MYSQLI_ASSOC), JSON_INVALID_UTF8_IGNORE);
 	else
-		echo json_encode(['error' => 'No data']);	
+		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 
 function pauseStopWebTrackerTracking($conn,$active,$tracker_id,$quite){
+	$client_id = getCurrentClientId();
+	
 	if($active == false){ //stopping
-		$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=?, stop_time=? where tracker_id=?");
-		$stmt->bind_param('sss', $active,$GLOBALS['entry_time'],$tracker_id);
+		$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=?, stop_time=? WHERE tracker_id=? AND client_id=?");
+		$stmt->bind_param('ssss', $active,$GLOBALS['entry_time'],$tracker_id, $client_id);
 	}
 	else
 		if(checkTrackerStartedPreviously($conn,$tracker_id) == true){
-			$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=?  where tracker_id=?");
-			$stmt->bind_param('ss', $active,$tracker_id);
+			$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=? WHERE tracker_id=? AND client_id=?");
+			$stmt->bind_param('sss', $active,$tracker_id, $client_id);
 		}
 		else{
-			$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=?, start_time=? where tracker_id=?");
-			$stmt->bind_param('sss', $active,$GLOBALS['entry_time'],$tracker_id);
+			$stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET active=?, start_time=? WHERE tracker_id=? AND client_id=?");
+			$stmt->bind_param('ssss', $active,$GLOBALS['entry_time'],$tracker_id, $client_id);
 		}
 
 	if($quite)
@@ -159,7 +186,8 @@ function pauseStopWebTrackerTracking($conn,$active,$tracker_id,$quite){
 		}
 		else 
 			echo(json_encode(['result' => 'failed', 'error' => 'Error changing status']));	
-		}	
+		}
+	$stmt->close();	
 }
 
 function getHTMLContent($url){
@@ -174,16 +202,18 @@ function getHTMLContent($url){
     if($result)
     	echo json_encode($result);
     else
-    	echo json_encode(['result' => 'failed', 'error' => $stmt->error()]);
+    	echo json_encode(['result' => 'failed', 'error' => 'Failed to fetch content']);
 }
 
 //-------------------------------------------------------------------------
 
 function checkTrackerStartedPreviously($conn,$tracker_id){
-	$stmt = $conn->prepare("SELECT start_time FROM tb_core_web_tracker_list WHERE tracker_id = ?");
-	$stmt->bind_param("s", $tracker_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT start_time FROM tb_core_web_tracker_list WHERE tracker_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $tracker_id, $client_id);
 	$stmt->execute();
 	$row = $stmt->get_result()->fetch_assoc();
+	$stmt->close();
 	if($row['start_time'] == "")
 		return false;
 	else
@@ -206,8 +236,12 @@ function deleteWebTrackerData($conn, $tracker_id){
 //-----------------------------------------------------------------------------
 function getLinktoWebTracker($conn){
 	$resp = [];
-	$result = mysqli_query($conn, "SELECT tracker_id,tracker_name,tracker_step_data FROM tb_core_web_tracker_list");
-	if(mysqli_num_rows($result) > 0){
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT tracker_id,tracker_name,tracker_step_data FROM tb_core_web_tracker_list WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result->num_rows > 0){
 		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
 			$first_page = json_decode($row['tracker_step_data'],true)['web_forms']['data'][0]['page_url'];
 		    array_push($resp, array('tracker_id' => $row['tracker_id'], 'tracker_name' => $row['tracker_name'], 'first_page' => $first_page));
@@ -216,5 +250,6 @@ function getLinktoWebTracker($conn){
 	}
 	else
 		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 ?>

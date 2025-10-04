@@ -44,9 +44,9 @@ function getGraphsData() {
         if(count_mailcamp==0 && count_webtracker==0 && count_quicktracker==0)
             f_all_empty=true;
 
-        $('#lb_mailcamp').text('Total: ' + count_mailcamp + ', Active: ' + count_mailcamp_active);
-        $('#lb_webtracker').text('Total: ' + count_webtracker + ', Active: ' + count_webtracker_active);
-        $('#lb_quicktracker').text('Total: ' + count_quicktracker + ', Active: ' + count_quicktracker_active);
+        $('#lb_mailcamp').text('Total: ' + count_mailcamp + ', Ativas: ' + count_mailcamp_active);
+        $('#lb_webtracker').text('Total: ' + count_webtracker + ', Ativos: ' + count_webtracker_active);
+        $('#lb_quicktracker').text('Total: ' + count_quicktracker + ', Ativos: ' + count_quicktracker_active);
 
 
         $("#graph_timeline_all").html(html_cont);
@@ -55,12 +55,12 @@ function getGraphsData() {
         else{
             $("#graph_overview").html('');
             renderOverviewGraph(data.campaign_info, data.timestamp_conv);  
-            $('#graph_overview').css("height","400px");
+            $('#graph_overview').css("height","300px");
 
             if(data.campaign_info.webtracker.some(o => o.start_time!='-') || data.campaign_info.mailcamp.some(o => o.scheduled_time!='-') || data.campaign_info.quicktracker.some(o => o.start_time!='-')){
                 $("#graph_timeline_all").html('');
                 renderTimelineAllGraph(data.campaign_info,data.timestamp_conv,data.timezone);
-                $('#graph_timeline_all').css("height","400px");
+                $('#graph_timeline_all').css("height","300px");
             }   
         }
     }); 
@@ -139,25 +139,67 @@ function renderOverviewGraph(cmp_info, timestamp_conv) {
 
     var options = {
         series: [{
-            name: 'Mail Campaign',
-            data: graph_data_all_count.mailcamp
+            name: 'Campanhas de E-mail',
+            data: graph_data_all_count.mailcamp,
+            color: '#667eea'
         }, {
-            name: 'Web Tracker',
-            data: graph_data_all_count.webtracker
+            name: 'Rastreadores Web',
+            data: graph_data_all_count.webtracker,
+            color: '#93fbadff'
         }, {
-            name: 'Quick Tracker',
-            data: graph_data_all_count.quicktracker
+            name: 'Rastreadores Rápidos',
+            data: graph_data_all_count.quicktracker,
+            color: '#4facfe'
         }],
         chart: {
             type: 'bar',
             height: 350,
             stacked: true,
             toolbar: {
-                show: true
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: true
+                }
             },
             zoom: {
                 enabled: true
+            },
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800
+            },
+            dropShadow: {
+                enabled: true,
+                color: '#000',
+                top: 18,
+                left: 7,
+                blur: 10,
+                opacity: 0.2
             }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                borderRadius: 8,
+                dataLabels: {
+                    position: 'top'
+                }
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
         },
         yaxis: {
             show: true,
@@ -166,28 +208,90 @@ function renderOverviewGraph(cmp_info, timestamp_conv) {
                 formatter: (value) => {
                     return Math.round(value * 100) / 100
                 },
+                style: {
+                    colors: '#64748b',
+                    fontSize: '12px'
+                }
             },
             title: {
-                text: 'Campaign count',
+                text: 'Quantidade de Campanhas',
+                // rotate should be -90 to place the y-axis title correctly
                 rotate: 90,
-                offsetX: 0,
+                // nudge the title slightly to the left so it doesn't get clipped
+                offsetX: 10,
+                // small vertical adjustment if needed
                 offsetY: 0,
                 style: {
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontSize: '14px',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: 600,
-                    cssClass: 'apexcharts-yaxis-title',
+                    color: '#374151'
                 },
             },
         },
+        xaxis: {
+            type: 'datetime',
+            categories: date_arr.all,
+            labels: {
+                formatter: function(value, timestamp) {
+                    return Unix2StdDate(timestamp)
+                },
+                style: {
+                    colors: '#64748b',
+                    fontSize: '12px'
+                }
+            },
+            tickAmount: 10,
+            axisBorder: {
+                show: true,
+                color: '#010918ff'
+            },
+            axisTicks: {
+                show: true,
+                color: '#e5e7eb'
+            }
+        },
         tooltip: {
+            theme: 'light',
             custom: function({
                 series,
                 seriesIndex,
                 dataPointIndex,
                 w
             }) {
-                return `<div class="chart-tooltip"><strong>` + w.config.series[seriesIndex].name + `</strong><br/>Date: ` + getDTStd(w.config.xaxis.categories[dataPointIndex]) + ` <br/>Count: ` + w.config.series[seriesIndex].data[dataPointIndex] + `</div>`;
+                return `<div class="px-3 py-2 bg-white shadow-lg rounded-lg border">
+                    <div class="font-semibold text-gray-800">` + w.config.series[seriesIndex].name + `</div>
+                    <div class="text-sm text-gray-600">Data: ` + getDTStd(w.config.xaxis.categories[dataPointIndex]) + `</div>
+                    <div class="text-sm text-gray-600">Quantidade: ` + w.config.series[seriesIndex].data[dataPointIndex] + `</div>
+                </div>`;
+            }
+        },
+        legend: {
+            position: 'bottom',
+            offsetY: 5,
+            fontSize: '14px',
+            fontFamily: 'Inter, sans-serif',
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 6
+            }
+        },
+        grid: {
+            borderColor: '#f1f5f9',
+            strokeDashArray: 3
+        },
+        fill: {
+            opacity: 0.85,
+            gradient: {
+                shade: 'light',
+                type: 'vertical',
+                shadeIntensity: 0.25,
+                gradientToColors: undefined,
+                inverseColors: false,
+                opacityFrom: 0.85,
+                opacityTo: 0.55,
+                stops: [50, 0, 100]
             }
         },
         responsive: [{
@@ -199,29 +303,7 @@ function renderOverviewGraph(cmp_info, timestamp_conv) {
                     offsetY: 0
                 }
             }
-        }],
-        plotOptions: {
-            bar: {
-                horizontal: false,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            categories: date_arr.all, //MM/DD/YYYY
-            labels: {
-                formatter: function(value, timestamp) {
-                    return Unix2StdDate(timestamp)
-                },
-            },
-            tickAmount: 10
-        },
-        legend: {
-            position: 'bottom',
-            offsetY: 5,
-        },
-        fill: {
-            opacity: 1
-        },
+        }]
     };
 
     graph_overview = new ApexCharts(document.querySelector("#graph_overview"), options);
@@ -301,26 +383,71 @@ function renderTimelineAllGraph(cmp_info,timestamp_conv, timezone) {
 
     var options = {
         series: [{
-                name: 'Mail Campaign',
-                data: time_arr.mailcamp
+                name: 'Campanhas de E-mail',
+                data: time_arr.mailcamp,
+                color: '#667eea'
             },
             {
-                name: 'Web Tracker',
-                data: time_arr.webtracker
+                name: 'Rastreadores Web',
+                data: time_arr.webtracker,
+                color: '#f093fb'
             },
             {
-                name: 'Quick Tracker',
-                data: time_arr.quicktracker
+                name: 'Rastreadores Rápidos',
+                data: time_arr.quicktracker,
+                color: '#4facfe'
             }
         ],
         chart: {
-            height: 450,
+            height: 350,
             type: 'rangeBar',
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800
+            },
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: false,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: true
+                }
+            },
+            dropShadow: {
+                enabled: true,
+                color: '#000',
+                top: 3,
+                left: 3,
+                blur: 8,
+                opacity: 0.15
+            }
         },
         plotOptions: {
             bar: {
                 horizontal: true,
-                barHeight: '80%'
+                barHeight: '70%',
+                borderRadius: 6,
+                rangeBarOverlap: false,
+                rangeBarGroupRows: false
+            }
+        },
+        colors: ['#667eea', '#f093fb', '#4facfe'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                shadeIntensity: 0.25,
+                gradientToColors: ['#764ba2', '#f5576c', '#00f2fe'],
+                inverseColors: false,
+                opacityFrom: 0.85,
+                opacityTo: 0.65,
+                stops: [0, 100]
             }
         },
         xaxis: {
@@ -329,16 +456,20 @@ function renderTimelineAllGraph(cmp_info,timestamp_conv, timezone) {
                 formatter: function(value, timestamp) {
                     return Unix2StdDate(value)
                 },
+                style: {
+                    colors: '#64748b',
+                    fontSize: '12px'
+                }
             },
-            tickAmount: 10,
-        },
-        stroke: {
-            width: 1
-        },
-
-        legend: {
-            position: 'bottom',
-            horizontalAlign: 'center'
+            tickAmount: 8,
+            axisBorder: {
+                show: true,
+                color: '#e5e7eb'
+            },
+            axisTicks: {
+                show: true,
+                color: '#e5e7eb'
+            }
         },
         yaxis: {
             show: true,
@@ -346,21 +477,56 @@ function renderTimelineAllGraph(cmp_info,timestamp_conv, timezone) {
                 formatter: (value) => {
                     return Math.round(Number(value))
                 },
+                style: {
+                    colors: '#64748b',
+                    fontSize: '12px'
+                }
             },
             title: {
-                text: 'Campaigns',
+                text: 'Índice da Campanha',
                 rotate: 90,
                 offsetX: 0,
                 offsetY: 0,
                 style: {
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontSize: '14px',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: 600,
-                    cssClass: 'apexcharts-yaxis-title',
+                    color: '#374151'
                 },
             },
         },
+        stroke: {
+            width: 1,
+            colors: ['transparent']
+        },
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+            fontSize: '14px',
+            fontFamily: 'Inter, sans-serif',
+            offsetY: 10,
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 6
+            }
+        },
+        grid: {
+            borderColor: '#f1f5f9',
+            strokeDashArray: 3,
+            xaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: false
+                }
+            }
+        },
         tooltip: {
+            theme: 'light',
             custom: function({
                 series,
                 seriesIndex,
@@ -372,13 +538,17 @@ function renderTimelineAllGraph(cmp_info,timestamp_conv, timezone) {
 
                 st = Unix2StdDateTime(st,timezone);
                 if(w.config.series[seriesIndex].data[dataPointIndex].z[2] == '-')   //if not ended
-                    et = 'Ꝏ';
+                    et = 'Em execução';
                 else
                     et = Unix2StdDateTime(et,timezone);
 
-                return `<div class="chart-tooltip"><strong>` + w.config.series[seriesIndex].name + `</strong><br/>Name: ` + w.config.series[seriesIndex].data[dataPointIndex].z[1] + ` (ID: ` + w.config.series[seriesIndex].data[dataPointIndex].z[0] + `)<br/>Run: ` + st + ' to ' + et + `</div>`;
-            },
-
+                return `<div class="px-3 py-2 bg-white shadow-lg rounded-lg border">
+                    <div class="font-semibold text-gray-800 mb-2">` + w.config.series[seriesIndex].name + `</div>
+                    <div class="text-sm text-gray-600"><strong>Nome:</strong> ` + w.config.series[seriesIndex].data[dataPointIndex].z[1] + `</div>
+                    <div class="text-sm text-gray-600"><strong>ID:</strong> ` + w.config.series[seriesIndex].data[dataPointIndex].z[0] + `</div>
+                    <div class="text-sm text-gray-600"><strong>Período:</strong> ` + st + ' até ' + et + `</div>
+                </div>`;
+            }
         },
         dataLabels: {
             enabled: true,
@@ -386,12 +556,42 @@ function renderTimelineAllGraph(cmp_info,timestamp_conv, timezone) {
                 var a = moment(val[0]);
                 var b= moment(val[1]);
                 var diff_hrs = b.diff(a, 'hours', true);
-                return diff_hrs.toFixed(2) + (diff_hrs > 1 ? ' hrs' : ' hr');
+                if (diff_hrs < 1) {
+                    var diff_mins = b.diff(a, 'minutes', true);
+                    return diff_mins.toFixed(0) + ' min';
+                } else if (diff_hrs < 24) {
+                    return diff_hrs.toFixed(1) + ' h';
+                } else {
+                    var diff_days = b.diff(a, 'days', true);
+                    return diff_days.toFixed(1) + ' d';
+                }
             },
             style: {
-                colors: ['#f3f4f5', '#fff']
+                fontSize: '11px',
+                fontWeight: 600,
+                colors: ['#e4ddddff']
+            },
+            background: {
+                enabled: true,
+                foreColor: '#3a3535ff',
+                borderRadius: 4,
+                padding: 2,
+                opacity: 0.8
             }
         },
+        responsive: [{
+            breakpoint: 768,
+            options: {
+                chart: {
+                    height: 300
+                },
+                plotOptions: {
+                    bar: {
+                        barHeight: '60%'
+                    }
+                }
+            }
+        }]
     };
 
     graph_timeline_all = new ApexCharts(document.querySelector("#graph_timeline_all"), options);

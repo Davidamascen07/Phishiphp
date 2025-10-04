@@ -112,19 +112,30 @@ function addUserToTable($conn, &$POSTJ){
 }
 
 function saveUserGroup($conn, $user_group_id, $user_group_name){
-	if(checkAnIDExist($conn,$user_group_id,'user_group_id','tb_core_mailcamp_user_group')){
-		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_user_group SET user_group_name=? WHERE user_group_id=?");
-		$stmt->bind_param('ss', $user_group_name,$user_group_id);
+	$client_id = getCurrentClientId();
+	
+	// Verificar se existe o user group para este cliente
+	$stmt_check = $conn->prepare("SELECT COUNT(*) FROM tb_core_mailcamp_user_group WHERE user_group_id = ? AND client_id = ?");
+	$stmt_check->bind_param('ss', $user_group_id, $client_id);
+	$stmt_check->execute();
+	$result = $stmt_check->get_result();
+	$exists = $result->fetch_row()[0] > 0;
+	$stmt_check->close();
+
+	if($exists){
+		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_user_group SET user_group_name=? WHERE user_group_id=? AND client_id=?");
+		$stmt->bind_param('sss', $user_group_name,$user_group_id,$client_id);
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_user_group(user_group_id,user_group_name,date) VALUES(?,?,?)");
-		$stmt->bind_param('sss', $user_group_id,$user_group_name,$GLOBALS['entry_time']);
+		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_user_group(user_group_id,user_group_name,date,client_id) VALUES(?,?,?,?)");
+		$stmt->bind_param('ssss', $user_group_id,$user_group_name,$GLOBALS['entry_time'],$client_id);
 	}
 	
 	if ($stmt->execute() === TRUE)
 		echo(json_encode(['result' => 'success']));	
 	else 
 		echo(json_encode(['result' => 'failed', 'error' => 'Error saving data!']));	
+	$stmt->close();
 }
 
 function updateUser($conn, &$POSTJ){
@@ -211,9 +222,15 @@ function downloadUser($conn, $user_group_id){
 function getUserGroupList($conn){
 	$resp = [];
 	$DTime_info = getTimeInfo($conn);
-	$result = mysqli_query($conn, "SELECT user_group_id,user_group_name,JSON_LENGTH(user_data) as user_count,date FROM tb_core_mailcamp_user_group");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$client_id = getCurrentClientId();
+	
+	$stmt = $conn->prepare("SELECT user_group_id,user_group_name,JSON_LENGTH(user_data) as user_count,date FROM tb_core_mailcamp_user_group WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	
+	if($result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["user_data"] = json_decode($row["user_data"]);	//avoid double json encoding
 			$row["date"] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
         	array_push($resp,$row);
@@ -221,7 +238,8 @@ function getUserGroupList($conn){
 		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
 	}
 	else
-		echo json_encode(['error' => 'No data']);	
+		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 
 function uploadUserCVS($conn, &$POSTJ){
@@ -373,13 +391,18 @@ function getUserGroupFromGroupIdTable($conn,&$POSTJ){
 
 	if(!empty($row)){
 		$user_data = json_decode($row["user_data"],true);
-		foreach ($user_data as $item){
-		    $m_array = preg_grep('/.*'.$search_value.'.*/', $item);
-		    if(!empty($m_array))
-		    	array_push($arr_filtered, $item);
+		if(!empty($user_data) && is_array($user_data)){
+			foreach ($user_data as $item){
+			    $m_array = preg_grep('/.*'.$search_value.'.*/', $item);
+			    if(!empty($m_array))
+			    	array_push($arr_filtered, $item);
+			}
+			$totalRecords = sizeof($user_data);
+		} else {
+			$totalRecords = 0;
+			$arr_filtered = [];
 		}
 
-		$totalRecords = empty($row['user_data'])?0:sizeof($user_data);
 		$totalRecords_with_filter = sizeof($arr_filtered);
 		$resp = array(
 		  "draw" => intval($draw),
@@ -391,13 +414,23 @@ function getUserGroupFromGroupIdTable($conn,&$POSTJ){
 		$resp['user_group_name'] = $row['user_group_name'];
 		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
 	}		
-	else
-		echo json_encode(['error' => 'No data']);	
+	else {
+		// Retornar estrutura válida mesmo quando não há dados
+		$resp = array(
+		  "draw" => intval($draw),
+		  "recordsTotal" => 0,
+		  "recordsFiltered" => 0,
+		  "data" => [],
+		  "user_group_name" => ""
+		);
+		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
+	}
 }
 
 function deleteUserGroupFromGroupId($conn,$user_group_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_user_group WHERE user_group_id = ?");
-	$stmt->bind_param("s", $user_group_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_user_group WHERE user_group_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $user_group_id, $client_id);
 	$stmt->execute();
 	if($stmt->affected_rows != 0)
 		echo json_encode(['result' => 'success']);	
@@ -407,8 +440,9 @@ function deleteUserGroupFromGroupId($conn,$user_group_id){
 }
 
 function makeCopyUserGroup($conn, $old_user_group_id, $new_user_group_id, $new_user_group_name){
-	$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_user_group (user_group_id,user_group_name,user_data,date) SELECT ?, ?,user_data,? FROM tb_core_mailcamp_user_group WHERE user_group_id=?");
-	$stmt->bind_param("ssss", $new_user_group_id, $new_user_group_name, $GLOBALS['entry_time'], $old_user_group_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_user_group (user_group_id,user_group_name,user_data,date,client_id) SELECT ?, ?,user_data,?,client_id FROM tb_core_mailcamp_user_group WHERE user_group_id=? AND client_id=?");
+	$stmt->bind_param("sssss", $new_user_group_id, $new_user_group_name, $GLOBALS['entry_time'], $old_user_group_id, $client_id);
 	
 	if($stmt->execute() === TRUE){
 		echo(json_encode(['result' => 'success']));	
@@ -419,10 +453,12 @@ function makeCopyUserGroup($conn, $old_user_group_id, $new_user_group_id, $new_u
 }
 
 function getUserGroupFromGroupId($conn, $user_group_id){
-	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_user_group WHERE user_group_id = ?");
-	$stmt->bind_param("s", $user_group_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_user_group WHERE user_group_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $user_group_id, $client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
+	$stmt->close();
 	if($result->num_rows != 0)
 		return $result->fetch_assoc();
 	return [];
@@ -440,14 +476,15 @@ function saveMailTemplate($conn,&$POSTJ){
 	$timage_type = $POSTJ['timage_type'];
 	$attachments = json_encode($POSTJ['attachments']);
 	$mail_content_type = $POSTJ['mail_content_type'];
+	$current_client_id = getCurrentClientId();
 
 	if(checkAnIDExist($conn,$mail_template_id,'mail_template_id','tb_core_mailcamp_template_list')){
-		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_template_list SET mail_template_name=?, mail_template_subject=?, mail_template_content=?, timage_type=?, mail_content_type=?, attachment=? WHERE mail_template_id=?");
-		$stmt->bind_param('sssssss', $mail_template_name,$mail_template_subject, $mail_template_content,$timage_type,$mail_content_type,$attachments,$mail_template_id);
+		$stmt = $conn->prepare("UPDATE tb_core_mailcamp_template_list SET mail_template_name=?, mail_template_subject=?, mail_template_content=?, timage_type=?, mail_content_type=?, attachment=? WHERE mail_template_id=? AND client_id=?");
+		$stmt->bind_param('ssssssss', $mail_template_name,$mail_template_subject, $mail_template_content,$timage_type,$mail_content_type,$attachments,$mail_template_id,$current_client_id);
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_template_list(mail_template_id, mail_template_name, mail_template_subject, mail_template_content, timage_type, mail_content_type, attachment, date) VALUES(?,?,?,?,?,?,?,?)");
-		$stmt->bind_param('ssssssss', $mail_template_id,$mail_template_name,$mail_template_subject,$mail_template_content,$timage_type,$mail_content_type,$attachments,$GLOBALS['entry_time']);
+		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_template_list(mail_template_id, client_id, mail_template_name, mail_template_subject, mail_template_content, timage_type, mail_content_type, attachment, date) VALUES(?,?,?,?,?,?,?,?,?)");
+		$stmt->bind_param('sssssssss', $mail_template_id,$current_client_id,$mail_template_name,$mail_template_subject,$mail_template_content,$timage_type,$mail_content_type,$attachments,$GLOBALS['entry_time']);
 	}
 	
 	if ($stmt->execute() === TRUE){
@@ -460,10 +497,14 @@ function saveMailTemplate($conn,&$POSTJ){
 function getMailTemplateList($conn){
 	$resp = [];
 	$DTime_info = getTimeInfo($conn);
-	$result = mysqli_query($conn, "SELECT mail_template_id, mail_template_name, LEFT(mail_template_subject , 50) mail_template_subject, LEFT(mail_template_content , 50) mail_template_content,attachment,date FROM tb_core_mailcamp_template_list");
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT mail_template_id, mail_template_name, LEFT(mail_template_subject , 50) mail_template_subject, LEFT(mail_template_content , 50) mail_template_content,attachment,date FROM tb_core_mailcamp_template_list WHERE client_id = ?");
+	$stmt->bind_param('s', $current_client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
 
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	if($result && $result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["attachment"] = json_decode($row["attachment"]);	//avoid double json encoding
 			$row["date"] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
         	array_push($resp,$row);
@@ -476,8 +517,9 @@ function getMailTemplateList($conn){
 }
 
 function getMailTemplateFromTemplateId($conn, $mail_template_id){
-	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_template_list WHERE mail_template_id = ?");
-	$stmt->bind_param("s", $mail_template_id);
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_template_list WHERE mail_template_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $mail_template_id, $current_client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows != 0){
@@ -491,7 +533,9 @@ function getMailTemplateFromTemplateId($conn, $mail_template_id){
 }
 
 function deleteMailTemplateFromTemplateId($conn,$mail_template_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_template_list WHERE mail_template_id = ?");
+	$current_client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_template_list WHERE mail_template_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $mail_template_id, $current_client_id);
 	$stmt->bind_param("s", $mail_template_id);
 	$stmt->execute();
 	if($stmt->affected_rows != 0)
@@ -592,34 +636,50 @@ function saveSenderList($conn, &$POSTJ){
 	$mail_sender_mailbox = $POSTJ['mail_sender_mailbox'];
 	$sender_list_cust_headers = json_encode($POSTJ['sender_list_cust_headers']); 
 	$dsn_type = $POSTJ['dsn_type'];
+	$client_id = getCurrentClientId();
 
-	if(checkAnIDExist($conn,$sender_list_id,'sender_list_id','tb_core_mailcamp_sender_list')){
+	// Verificar se existe o sender para este cliente
+	$stmt_check = $conn->prepare("SELECT COUNT(*) FROM tb_core_mailcamp_sender_list WHERE sender_list_id = ? AND client_id = ?");
+	$stmt_check->bind_param('ss', $sender_list_id, $client_id);
+	$stmt_check->execute();
+	$result = $stmt_check->get_result();
+	$exists = $result->fetch_row()[0] > 0;
+	$stmt_check->close();
+
+	if($exists){
 		if($sender_list_mail_sender_acc_pwd != ''){	//new sender acc pwd
-			$stmt = $conn->prepare("UPDATE tb_core_mailcamp_sender_list SET sender_name=?, sender_SMTP_server=?, sender_from=?, sender_acc_username=?, sender_acc_pwd=?, auto_mailbox=?, sender_mailbox=?, cust_headers=?, dsn_type=? WHERE sender_list_id=?");
-			$stmt->bind_param('ssssssssss', $sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$sender_list_mail_sender_acc_pwd,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$sender_list_id);
+			$stmt = $conn->prepare("UPDATE tb_core_mailcamp_sender_list SET sender_name=?, sender_SMTP_server=?, sender_from=?, sender_acc_username=?, sender_acc_pwd=?, auto_mailbox=?, sender_mailbox=?, cust_headers=?, dsn_type=? WHERE sender_list_id=? AND client_id=?");
+			$stmt->bind_param('sssssssssss', $sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$sender_list_mail_sender_acc_pwd,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$sender_list_id,$client_id);
 		}
 		else{	//sender acc pwd has no change
-			$stmt = $conn->prepare("UPDATE tb_core_mailcamp_sender_list SET sender_name=?, sender_SMTP_server=?, sender_from=?, sender_acc_username=?, auto_mailbox=?, sender_mailbox=?, cust_headers=?, dsn_type=? WHERE sender_list_id=?");
-			$stmt->bind_param('sssssssss', $sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$sender_list_id);
+			$stmt = $conn->prepare("UPDATE tb_core_mailcamp_sender_list SET sender_name=?, sender_SMTP_server=?, sender_from=?, sender_acc_username=?, auto_mailbox=?, sender_mailbox=?, cust_headers=?, dsn_type=? WHERE sender_list_id=? AND client_id=?");
+			$stmt->bind_param('ssssssssss', $sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$sender_list_id,$client_id);
 		}
 	}
 	else{
-		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_sender_list(sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,date) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
-		$stmt->bind_param('sssssssssss', $sender_list_id,$sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$sender_list_mail_sender_acc_pwd,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$GLOBALS['entry_time']);
+		$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_sender_list(sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,date,client_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+		$stmt->bind_param('ssssssssssss', $sender_list_id,$sender_list_mail_sender_name,$sender_list_mail_sender_SMTP_server,$sender_list_mail_sender_from,$sender_list_mail_sender_acc_username,$sender_list_mail_sender_acc_pwd,$auto_mailbox,$mail_sender_mailbox,$sender_list_cust_headers,$dsn_type,$GLOBALS['entry_time'],$client_id);
 	}
 	
 	if ($stmt->execute() === TRUE)
 		echo json_encode(['result' => 'success']);
 	else 
 		echo json_encode(['result' => 'failed']);
+	$stmt->close();
 }
 
 function getSenderList($conn){
 	$resp = [];
 	$DTime_info = getTimeInfo($conn);
-	$result = mysqli_query($conn, "SELECT sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_mailbox,cust_headers,dsn_type,date FROM tb_core_mailcamp_sender_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$client_id = getCurrentClientId();
+	
+	$stmt = $conn->prepare("SELECT sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_mailbox,cust_headers,dsn_type,date FROM tb_core_mailcamp_sender_list WHERE client_id = ?");
+	$stmt->bind_param('s', $client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	
+	if($result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["cust_headers"] = json_decode($row["cust_headers"]);	//avoid double json encoding
 			$row["date"] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
         	array_push($resp,$row);
@@ -627,13 +687,14 @@ function getSenderList($conn){
 		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
 	}
 	else
-		echo json_encode(['error' => 'No data']);	
-	$result->close();
+		echo json_encode(['error' => 'No data']);
+	$stmt->close();
 }
 
 function getSenderFromSenderListId($conn, $sender_list_id){
-	$stmt = $conn->prepare("SELECT sender_name,sender_SMTP_server,sender_from,sender_acc_username,auto_mailbox,sender_mailbox,cust_headers,dsn_type FROM tb_core_mailcamp_sender_list WHERE sender_list_id = ?");
-	$stmt->bind_param("s", $sender_list_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("SELECT sender_name,sender_SMTP_server,sender_from,sender_acc_username,auto_mailbox,sender_mailbox,cust_headers,dsn_type FROM tb_core_mailcamp_sender_list WHERE sender_list_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $sender_list_id, $client_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows > 0){
@@ -647,8 +708,9 @@ function getSenderFromSenderListId($conn, $sender_list_id){
 }
 
 function deleteMailSenderListFromSenderId($conn, $sender_list_id){	
-	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_sender_list WHERE sender_list_id = ?");
-	$stmt->bind_param("s", $sender_list_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("DELETE FROM tb_core_mailcamp_sender_list WHERE sender_list_id = ? AND client_id = ?");
+	$stmt->bind_param("ss", $sender_list_id, $client_id);
 	$stmt->execute();
 	if($stmt->affected_rows != 0)
 		echo json_encode(['result' => 'success']);	
@@ -658,8 +720,9 @@ function deleteMailSenderListFromSenderId($conn, $sender_list_id){
 }
 
 function makeCopyMailSenderList($conn, $old_sender_list_id, $new_sender_list_id, $new_sender_list_name){
-	$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_sender_list (sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,date) SELECT ?, ?, sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,? FROM tb_core_mailcamp_sender_list WHERE sender_list_id=?");
-	$stmt->bind_param("ssss", $new_sender_list_id, $new_sender_list_name, $GLOBALS['entry_time'], $old_sender_list_id);
+	$client_id = getCurrentClientId();
+	$stmt = $conn->prepare("INSERT INTO tb_core_mailcamp_sender_list (sender_list_id,sender_name,sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,date,client_id) SELECT ?, ?, sender_SMTP_server,sender_from,sender_acc_username,sender_acc_pwd,auto_mailbox,sender_mailbox,cust_headers,dsn_type,?,client_id FROM tb_core_mailcamp_sender_list WHERE sender_list_id=? AND client_id=?");
+	$stmt->bind_param("sssss", $new_sender_list_id, $new_sender_list_name, $GLOBALS['entry_time'], $old_sender_list_id, $client_id);
 	
 	if ($stmt->execute() === TRUE)
 		echo json_encode(['result' => 'success']);	
