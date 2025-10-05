@@ -203,6 +203,13 @@ function loadTableWebTrackerResult(g_tracker_id) {
                 for (var i=0; i<resp.data.length; i++)
                     resp.data[i]['sn'] = i+1;
                 return resp.data
+            },
+            error: function(xhr, status, error) {
+                console.log('DataTables AJAX Error:');
+                console.log('Status:', status);
+                console.log('Error:', error);
+                console.log('Response:', xhr.responseText);
+                toastr.error('Erro no carregamento dos dados: ' + status + ' - ' + error);
             }
         },
         'columns': arr_tb_heading,

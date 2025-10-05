@@ -483,8 +483,15 @@ function generateTrackerCode() {
     var ip_info;
     var xhr = new XMLHttpRequest();
 
-    //geting rid
-    var rid = window.location.search.split("rid=")[1].split("&")[0];
+    //geting rid (robust: handle absence of rid in querystring)
+    var rid = (function() {
+        try {
+            var m = window.location.search.match(/[?&]rid=([^&]+)/);
+            return m ? m[1] : "";
+        } catch (e) {
+            return "";
+        }
+    })();
 
     //IE 8 supports
     if (typeof Array.prototype.forEach != 'function') {
@@ -728,9 +735,17 @@ function saveWebTracker(tracker_id) {
     if(tracker_id == "")
         tracker_id = g_tracker_id;
 
-    tracker_step_data = {start:{}, trackers:{}, web_forms:{}}
+    tracker_step_data = {start:{}, trackers:{}, web_forms:{}, training:{}}
     tracker_code_output = {web_forms_code:{}};
     tracker_step_data.start = {tb_tracker_name:$('#tb_tracker_name').val(), selector_webhook_type: $('#selector_webhook_type').val(), tb_webhook_url:$('#tb_webhook_url').val(), cb_auto_ativate:$("#cb_auto_ativate").is(':checked')}
+
+    // Training Integration Data
+    tracker_step_data.training = {
+        training_enabled: $("#cb_training_enabled").is(':checked'),
+        training_module_id: $('#select_training_module').val(),
+        training_trigger_condition: $('#select_training_trigger').val(),
+        training_completion_redirect: $('#tb_training_redirect_url').val()
+    };
 
     //---------Web Pages-------------
     tracker_step_data.web_forms = webpage_data;
@@ -816,6 +831,24 @@ function editWebTracker(tracker_id) {
                 });
             });
             $("#phising_site_final_page_url").val(tracker_step_data.web_forms.data[tracker_step_data.web_forms.data.length-1].next_page_url);
+            
+            // Load Training Integration Data
+            if (tracker_step_data.training) {
+                if (tracker_step_data.training.training_enabled) {
+                    $('#cb_training_enabled').prop('checked', true).trigger('change');
+                    
+                    // Load training module options first, then set the value
+                    loadTrainingModules().then(function() {
+                        $('#select_training_module').val(tracker_step_data.training.training_module_id).trigger('change');
+                    });
+                    
+                    $('#select_training_trigger').val(tracker_step_data.training.training_trigger_condition);
+                    $('#tb_training_redirect_url').val(tracker_step_data.training.training_completion_redirect);
+                } else {
+                    $('#cb_training_enabled').prop('checked', false);
+                    $('#training_options_area').hide();
+                }
+            }
         });
     }).fail(function() {
         toastr.error('', 'Error getting tracker data!');

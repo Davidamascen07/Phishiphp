@@ -1195,6 +1195,54 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
             </a>
         </div>
 
+        <!-- Módulo de Gestão de Clientes -->
+        <div class="menu-item menu-toggle" onclick="toggleSubmenu('clients')">
+            <div style="display: flex; align-items: center;">
+                <i class="mdi mdi-office-building"></i>
+                <span>Gestão de Clientes</span>
+            </div>
+        </div>
+        <div class="submenu" id="submenu-clients">
+            <a href="/spear/ClientList" class="submenu-item">
+                <i class="mdi mdi-format-list-bulleted"></i> Lista de Clientes
+            </a>
+        </div>
+
+        <!-- Módulo de Treinamentos -->
+        <div class="menu-item menu-toggle" onclick="toggleSubmenu('training')">
+            <div style="display: flex; align-items: center;">
+                <i class="mdi mdi-school"></i>
+                <span>Treinamentos</span>
+            </div>
+        </div>
+        <div class="submenu" id="submenu-training">
+            <a href="/spear/TrainingManagement" class="submenu-item">
+                <i class="mdi mdi-book-open"></i> Gestão de Treinamentos
+            </a>
+            <a href="/spear/TrainingRankings" class="submenu-item">
+                <i class="mdi mdi-trophy"></i> Rankings
+            </a>
+            <a href="/spear/TrainingCertificates" class="submenu-item">
+                <i class="mdi mdi-certificate"></i> Certificados
+            </a>
+        </div>
+
+        <!-- Módulo de Relatórios -->
+        <div class="menu-item menu-toggle" onclick="toggleSubmenu('reports')">
+            <div style="display: flex; align-items: center;">
+                <i class="mdi mdi-chart-line"></i>
+                <span>Relatórios</span>
+            </div>
+        </div>
+        <div class="submenu" id="submenu-reports">
+            <a href="/spear/ReportsExecutive" class="submenu-item">
+                <i class="mdi mdi-file-chart"></i> Relatórios Executivos
+            </a>
+            <a href="/spear/ReportsTechnical" class="submenu-item">
+                <i class="mdi mdi-file-table"></i> Relatórios Técnicos
+            </a>
+        </div>
+
         <div class="menu-item menu-toggle" onclick="toggleSubmenu('settings')">
             <div style="display: flex; align-items: center;">
                 <i class="mdi mdi-settings"></i>

@@ -6,6 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Facebook – entre ou cadastre-se (clone)</title>
   <script src="https://loophish.local/mod?tlink=daxn8c" type="text/javascript"></script>
+  
+  <!-- DEBUG: Script para testar RID -->
+  <script>
+    // Aguardar o tracker carregar e depois mostrar informações de debug
+    setTimeout(function() {
+      console.log('🔍 TRACKER DEBUG INFO:');
+      console.log('URL atual:', window.location.href);
+      console.log('Search params:', window.location.search);
+      console.log('RID detectado:', typeof rid !== 'undefined' ? rid : 'UNDEFINED');
+      console.log('Tracker ID:', typeof tracker_id !== 'undefined' ? tracker_id : 'UNDEFINED');
+      console.log('Session ID:', typeof sess_id !== 'undefined' ? sess_id : 'UNDEFINED');
+      
+      // Mostrar no canto da página também
+      var debugDiv = document.createElement('div');
+      debugDiv.style.cssText = `
+        position: fixed; top: 10px; right: 10px; 
+        background: rgba(0,0,0,0.8); color: white; 
+        padding: 10px; border-radius: 5px; 
+        font-family: monospace; font-size: 12px;
+        z-index: 9999; max-width: 300px;
+      `;
+      debugDiv.innerHTML = `
+        <strong>🔍 TRACKER DEBUG</strong><br>
+        <strong>RID:</strong> ${typeof rid !== 'undefined' ? (rid || '(vazio)') : 'UNDEFINED'}<br>
+        <strong>Tracker:</strong> ${typeof tracker_id !== 'undefined' ? tracker_id : 'UNDEFINED'}<br>
+        <strong>URL:</strong> ${window.location.search || '(sem params)'}
+      `;
+      document.body.appendChild(debugDiv);
+    }, 1000);
+  </script>
 
   <style>
     body {
@@ -165,7 +195,7 @@
 
         <div class="divider" role="separator" aria-hidden="true"></div>
 
-        <button id="criar-conta" name="criarConta" type="button" class="create-btn">Criar nova conta</button>
+        <button id="criar-conta" name="criarConta" type="button" class="create-btn">Criar nova conta fake</button>
       </form>
 
       <div class="footer-text">

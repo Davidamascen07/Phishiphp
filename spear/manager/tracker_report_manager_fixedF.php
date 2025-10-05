@@ -1,45 +1,18 @@
 <?php
-// Limpar qualquer output anterior
-ob_start();
-ob_clean();
-
 require_once(dirname(__FILE__) . '/session_manager.php');
 require_once(dirname(__FILE__,2) . '/libs/tcpdf_min/tcpdf.php');
-if(isSessionValid() == false) {
-    ob_clean();
-    header('Content-Type: application/json');
-    die(json_encode(['error' => 'Access denied']));
-}
+if(isSessionValid() == false)
+	die("Access denied");
 //-------------------------------------------------------
 date_default_timezone_set('UTC');
 $entry_time = (new DateTime())->format('d-m-Y h:i A');
 
-// Suprimir erros e warnings que possam corromper o JSON
-error_reporting(0);
-ini_set('display_errors', 0);
-
-// Limpar buffer e definir headers JSON
+// Clear any output buffer to prevent JSON corruption
 ob_clean();
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-cache, must-revalidate');
-header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Content-Type: application/json');
 
-if (isset($_POST) || !empty(file_get_contents('php://input'))) {
-	$input = file_get_contents('php://input');
-	if(empty($input)) {
-		ob_clean();
-		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(['error' => 'No input data']);
-		exit;
-	}
-	
-	$POSTJ = json_decode($input, true);
-	if(json_last_error() !== JSON_ERROR_NONE) {
-		ob_clean();
-		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(['error' => 'Invalid JSON input']);
-		exit;
-	}
+if (isset($_POST)) {
+	$POSTJ = json_decode(file_get_contents('php://input'),true);
 
 	if(isset($POSTJ['action_type'])){
 	    if($POSTJ['action_type'] == "get_table_webpage_visit_form_submission")
@@ -48,11 +21,6 @@ if (isset($_POST) || !empty(file_get_contents('php://input'))) {
 			getWebTrackerFromId($conn, $POSTJ['tracker_id']);
 		if($POSTJ['action_type'] == "download_report")
 			downloadReport($conn, $POSTJ['tracker_id'],$POSTJ['selected_col'],$POSTJ['dic_all_col'],$POSTJ['page'],$POSTJ['file_name'],$POSTJ['file_format']);
-	} else {
-		ob_clean();
-		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(['error' => 'No action type specified']);
-		exit;
 	}
 }
 
@@ -93,56 +61,22 @@ function downloadReport($conn,$tracker_id,$selected_col,$dic_all_col,$page,$file
 			    		$tmp[$col] = $form_field_data[$cust_field];
 			    	else
 			    		$tmp[$col] = null;
-			    }
-			    if($col=='time')
-			    	$tmp[$col] = getInClientTime($DTime_info,$row[$col]);
+		    	}
+		        if($col=='time')
+					$tmp[$col] = getInClientTime($DTime_info,$row[$col]);
 			}
-			array_push($arr_odata,$tmp);		    
+			array_push($arr_odata,$tmp);
 		}
-
-		if($file_format == 'csv'){
-			$f = fopen('php://memory', 'w'); 
-
-			$tmp=[];
-			foreach ($selected_col as $col)
-				if(array_key_exists($col,$dic_all_col))
-					array_push($tmp,$dic_all_col[$col]);
-				else
-					array_push($tmp,$col);
-			
-			fputcsv($f, $tmp);
-
-			foreach ($arr_odata as $line) 
-				fputcsv($f, $line, ',');
-			fseek($f, 0);
-		    header('Content-Type: text/csv');
-		    header('Content-Disposition: attachment;filename="'.$file_name.'.csv"');
-		    fpassthru($f);
-		}
-		elseif ($file_format == 'pdf') {
-			$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-			$pdf->SetCreator(PDF_CREATOR);
-			$pdf->SetAuthor('SniperPhish');
-			$pdf->SetTitle('Report data');
-			$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-			$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-			$pdf->SetFont('helvetica', '', 8, '', true);
-			$pdf->AddPage();
-
-			$html_data=getHTMLData($arr_odata,$file_name,$selected_col,$dic_all_col);
-
-			$pdf->writeHTML($html_data, true, false, true, false, '');
-			$pdf->lastPage();
-			$pdf->Output($file_name.'.pdf', 'I');
-		}
-		elseif ($file_format == 'html') {
-			header('Content-Type: text/html');
-		    header('Content-Disposition: attachment;filename="'.$file_name.'.html"');
-			echo getHTMLData($arr_odata,$file_name,$selected_col,$dic_all_col);
-		}
+		
+		if($file_format == 'csv')
+			array2csv($arr_odata,$file_name,$dic_all_col);
+		elseif($file_format == 'pdf')
+			array2pdf($arr_odata,$file_name,$dic_all_col);
 	}
+	$stmt->close();
 }
 
+//---------------------
 function getTableWebpageVisitFormSubmission($conn, &$POSTJ){
 	$offset = htmlspecialchars($POSTJ['start']);
 	$limit = htmlspecialchars($POSTJ['length']);
@@ -231,6 +165,12 @@ function getTableWebpageVisitFormSubmission($conn, &$POSTJ){
 	}
 	$totalRecords_with_filter = sizeof($arr_filtered);
 	$stmt->close();
+	
+	// Clear any remaining output buffer before sending JSON
+	while (ob_get_level()) {
+		ob_end_clean();
+	}
+	
 	$resp = array(
 		  "draw" => intval($draw),
 		  "recordsTotal" => intval($totalRecords),
@@ -238,11 +178,7 @@ function getTableWebpageVisitFormSubmission($conn, &$POSTJ){
 		  "data" => $arr_filtered
 		);
 
-	// Limpar qualquer output anterior antes de enviar JSON
-	ob_clean();
-	header('Content-Type: application/json; charset=utf-8');
 	echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
-	exit;
 }
 
 function getWebTrackerFromId($conn, $tracker_id){	
@@ -250,20 +186,83 @@ function getWebTrackerFromId($conn, $tracker_id){
 	$stmt->bind_param("s", $tracker_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
-	
-	// Limpar buffer antes de enviar resposta
-	ob_clean();
-	header('Content-Type: application/json; charset=utf-8');
-	
 	if($result->num_rows > 0){
 		$row = $result->fetch_assoc();
 		$row['tracker_step_data'] = json_decode($row["tracker_step_data"]);	
-		echo json_encode($row, JSON_INVALID_UTF8_IGNORE);
+		echo json_encode($row, JSON_INVALID_UTF8_IGNORE) ;
 	}
-	else {
+	else
 		echo json_encode(['error' => 'No data']);
+	$stmt->close();	
+}
+
+function array2csv($data, $filename, $dic_all_col) {
+    
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename='.$filename.'.csv');
+    
+    $fp = fopen('php://output', 'w');
+    if(sizeof($data)>0)
+    	fputcsv($fp, array_keys($data[0]));
+
+    foreach ($data as $line) {
+        fputcsv($fp, $line);
+    }
+    fclose($fp);
+}
+
+function array2pdf($data, $filename, $dic_all_col) {
+	$pdf = new TCPDF();
+	$pdf->AddPage();
+	$pdf->SetFont('dejavusans', '', 12);
+
+	$html = '<table border="1" cellpadding="4">
+	<thead><tr>';
+
+	if(sizeof($data)>0)
+		foreach(array_keys($data[0]) as $header){
+			$header = str_replace('Field-','',$header);
+			$html .= '<th>'.$header.'</th>';
+		}
+	$html .= '</tr></thead><tbody>';
+
+	foreach ($data as $row) {
+	    $html .= '<tr>';
+	    foreach ($row as $cell) {
+	        $html .= '<td>'.htmlspecialchars($cell).'</td>';
+	    }
+	    $html .= '</tr>';
 	}
-	$stmt->close();
-	exit;
+	$html .= '</tbody></table>';
+
+	$pdf->writeHTML($html, true, false, true, false, '');
+	header('Content-Type: application/pdf');
+	header('Content-Disposition: attachment; filename="'.$filename.'.pdf"');
+	$pdf->Output($filename.'.pdf', 'D');
+}
+
+function getTimeInfo($conn){
+	$stmt = $conn->prepare("SELECT curr_timezone FROM tb_settings_general WHERE setting_id=1");
+	$stmt->execute();
+	$result = $stmt->get_result();
+	
+	if($result->num_rows > 0){
+		$row = $result->fetch_assoc();
+		return $row['curr_timezone'];
+	}
+	return 'UTC';
+}
+
+function getInClientTime($clientTZ, $serverTime) {
+    try {
+        $dt = new DateTime();
+        $dt->setTimestamp($serverTime / 1000);
+        $dt->setTimezone(new DateTimeZone($clientTZ));
+        return $dt->format('d-m-Y, H:i:s:v A');
+    } catch (Exception $e) {
+        $dt = new DateTime();
+        $dt->setTimestamp($serverTime / 1000);
+        return $dt->format('d-m-Y, H:i:s:v A');
+    }
 }
 ?>

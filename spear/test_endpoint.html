@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test AJAX Endpoint</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Teste do Endpoint AJAX</h1>
+    <button onclick="testarEndpoint()">Testar Endpoint</button>
+    <pre id="resultado"></pre>
+    
+    <script>
+    function testarEndpoint() {
+        console.log('Testando endpoint...');
+        
+        // Dados para o teste
+        var testData = {
+            action_type: "get_table_webpage_visit_form_submission",
+            tracker_id: "daxn8c",
+            page: 0,
+            selected_col: ["rid", "public_ip", "time", "browser", "platform"],
+            start: 0,
+            length: 10,
+            draw: 1,
+            search: { value: "" },
+            order: [{ column: 0, dir: "asc" }],
+            columns: [
+                { data: "sn" },
+                { data: "rid" },
+                { data: "public_ip" },
+                { data: "time" },
+                { data: "browser" },
+                { data: "platform" }
+            ]
+        };
+        
+        $.post({
+            url: "manager/tracker_report_manager",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(testData)
+        })
+        .done(function(data) {
+            console.log('Sucesso:', data);
+            $('#resultado').text('SUCESSO:\n' + JSON.stringify(data, null, 2));
+        })
+        .fail(function(xhr, status, error) {
+            console.log('Erro:', status, error);
+            console.log('Response:', xhr.responseText);
+            $('#resultado').text('ERRO:\nStatus: ' + status + '\nError: ' + error + '\nResponse: ' + xhr.responseText);
+        });
+    }
+    </script>
+</body>
+</html>

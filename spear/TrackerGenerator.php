@@ -30,6 +30,17 @@ isSessionValid(true);
          max-height: 1000px !important;
          /*workaround for Prism scrollbars*/
       }
+      
+      /* Estilo para validação do Select2 */
+      .select2-container.is-invalid .select2-selection--single {
+         border-color: #dc3545 !important;
+         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+      }
+      
+      .select2-container.is-invalid .select2-selection--single:focus {
+         border-color: #dc3545 !important;
+         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+      }
    </style>
    <link rel="stylesheet" type="text/css" href="css/toastr.min.css">
 </head>
@@ -132,6 +143,70 @@ isSessionValid(true);
                               </div>
 
                               <!--<p>(*) Mandatory</p> -->
+                           </section>
+                           <h3>Training Integration</h3>
+                           <section>
+                              <div class="col-md-12">
+                                 <div class="row mb-3">
+                                    <div class="col-md-12">
+                                       <h6 class="hbar">Training Module Association</h6>
+                                       <p>Associate this phishing campaign with training modules to enhance user awareness.</p>
+                                    </div>
+                                 </div>
+                                 
+                                 <div class="row mb-3">
+                                    <label for="cb_training_enabled" class="col-sm-3 text-left control-label col-form-label">Enable Training Integration</label>
+                                    <div class="custom-control custom-switch col-sm-3 m-t-15 row">
+                                       <label class="switch">
+                                          <input type="checkbox" id="cb_training_enabled">
+                                          <span class="slider round"></span>
+                                       </label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                       <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="When enabled, users who interact with this tracker will be redirected to training modules."></i>
+                                    </div>
+                                 </div>
+
+                                 <div id="training_options_area" style="display: none;">
+                                    <div class="row mb-3">
+                                       <label for="select_training_module" class="col-sm-3 text-left control-label col-form-label">Training Module</label>
+                                       <div class="col-sm-8">
+                                          <select class="select2 form-control custom-select" id="select_training_module" style="height: 36px;width: 100%;">
+                                             <option value="">Select Training Module...</option>
+                                             <!-- Options will be loaded dynamically -->
+                                          </select>
+                                       </div>
+                                       <div class="col-sm-1">
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Select which training module users will be redirected to after interaction."></i>
+                                       </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                       <label for="select_training_trigger" class="col-sm-3 text-left control-label col-form-label">Training Trigger</label>
+                                       <div class="col-sm-8">
+                                          <select class="form-control custom-select" id="select_training_trigger" style="height: 36px;width: 100%;">
+                                             <option value="immediate">Immediate - Right after click</option>
+                                             <option value="on_completion">On Completion - After completing the phishing flow</option>
+                                             <option value="on_failure">On Failure - After failed phishing attempt</option>
+                                             <option value="on_interaction">On Interaction - After any form interaction</option>
+                                          </select>
+                                       </div>
+                                       <div class="col-sm-1">
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Define when the training module should be triggered during the phishing simulation."></i>
+                                       </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                       <label for="tb_training_redirect_url" class="col-sm-3 text-left control-label col-form-label">Custom Redirect URL</label>
+                                       <div class="col-sm-8">
+                                          <input type="text" class="form-control" id="tb_training_redirect_url" placeholder="https://example.com/training-complete">
+                                       </div>
+                                       <div class="col-sm-1">
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Optional: URL to redirect after training completion. Leave empty to use default."></i>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
                            </section>
                            <h3>Web Pages</h3>
                            <section>
@@ -296,6 +371,69 @@ isSessionValid(true);
    <script src="js/common_scripts.js"></script>
    <script src="js/web_tracker_generator_function.js"></script>
    <script>
+      // Training Integration JavaScript
+      $(document).ready(function() {
+         // Toggle training options visibility
+         $('#cb_training_enabled').change(function() {
+            if ($(this).is(':checked')) {
+               $('#training_options_area').show();
+               loadTrainingModules();
+            } else {
+               $('#training_options_area').hide();
+            }
+         });
+
+         // Initialize Select2 for training module
+         $('#select_training_module').select2({
+            placeholder: 'Select Training Module...',
+            allowClear: true
+         });
+         
+         // Remove validation error when module is selected
+         $('#select_training_module').on('change', function() {
+            if ($(this).val() != "" && $(this).val() != null) {
+               $(this).next('.select2-container').removeClass('is-invalid');
+            }
+         });
+      });
+
+      // Load available training modules
+      function loadTrainingModules() {
+         return new Promise(function(resolve, reject) {
+            $.post({
+               url: "manager/training_integration_manager",
+               contentType: 'application/json; charset=utf-8',
+               data: JSON.stringify({ 
+                  action_type: "get_training_modules"
+               }),
+            }).done(function (response) {
+               if(response.result == "success") {
+                  var select = $('#select_training_module');
+                  select.empty();
+                  select.append('<option value="">Select Training Module...</option>');
+                  
+                  $.each(response.modules, function(index, module) {
+                     select.append('<option value="' + module.module_id + '">' + module.module_name + '</option>');
+                  });
+                  
+                  select.trigger('change');
+                  resolve();
+               } else {
+                  reject(response.error);
+               }
+            }).fail(function() {
+               // Fallback - add some default options if training module loading fails
+               var select = $('#select_training_module');
+               select.empty();
+               select.append('<option value="">Select Training Module...</option>');
+               select.append('<option value="phishing_awareness">Phishing Awareness Training</option>');
+               select.append('<option value="security_basics">Security Basics</option>');
+               select.append('<option value="email_safety">Email Safety</option>');
+               resolve();
+            });
+         });
+      }
+
       var form = $("#genreator-form");
 
       form.children("div").steps({
@@ -303,12 +441,18 @@ isSessionValid(true);
          bodyTag: "section",
          transitionEffect: "slide",
          onStepChanging: function(event, currentIndex, newIndex) {
+            console.log('Step changing from', currentIndex, 'to', newIndex); // Debug
+            
             $('[data-toggle="popover"]').popover('hide');
             if (currentIndex > newIndex)
                return true;
 
             var f_error = false;
+            
+            // Step 0: Start (Tracker Name, Webhook URL)
             if (currentIndex == 0) {
+               console.log('Validating Step 0 - Start'); // Debug
+               
                if ($("#tb_tracker_name").val() == "") {
                   $("#tb_tracker_name").addClass("is-invalid");
                   f_error = true;
@@ -321,8 +465,29 @@ isSessionValid(true);
                } else
                   $("#tb_webhook_url").removeClass("is-invalid");
             }
-
+            
+            // Step 1: Training Integration (optional validations)
             if (currentIndex == 1) {
+               console.log('Validating Step 1 - Training Integration'); // Debug
+               console.log('Training enabled:', $("#cb_training_enabled").is(':checked')); // Debug
+               
+               // Se treinamento está habilitado, validar campos obrigatórios
+               if ($("#cb_training_enabled").is(':checked')) {
+                  if ($("#select_training_module").val() == "" || $("#select_training_module").val() == null) {
+                     $("#select_training_module").next('.select2-container').addClass('is-invalid');
+                     console.log('Training module validation failed'); // Debug
+                     f_error = true;
+                  } else {
+                     $("#select_training_module").next('.select2-container').removeClass('is-invalid');
+                  }
+               }
+               // Se treinamento não está habilitado, sempre permitir continuar
+            }
+
+            // Step 2: Web Pages (antigo Step 1)
+            if (currentIndex == 2) {
+               console.log('Validating Step 2 - Web Pages'); // Debug
+               
                $('input[name="field_page_name"]').each(function() {
                   $(this).removeClass("is-invalid");
                });
@@ -389,10 +554,13 @@ isSessionValid(true);
                }
             }
 
+            console.log('Validation errors:', f_error); // Debug
+            
             if (f_error)
-               return;
+               return false;
 
-            if (currentIndex == 1) {
+            // Step 2 (Web Pages) - Generate code
+            if (currentIndex == 2) {
                generateFormFields();
                generateTrackerCode();
                saveWebTracker(''); // auto-save in final page

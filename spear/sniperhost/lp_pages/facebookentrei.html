@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Facebook</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f0f2f5;
+    }
+
+    /* Barra superior */
+    header {
+      background-color: #1877f2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .search-bar input {
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      width: 250px;
+      font-size: 14px;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-menu img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+
+    .user-menu button {
+      background-color: #166fe5;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 8px 12px;
+    }
+
+    .user-menu button:hover {
+      background-color: #145ecc;
+    }
+
+    /* Layout principal */
+    main {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* Menu lateral */
+    .sidebar {
+      width: 250px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      height: fit-content;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h3 {
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 8px 0;
+      color: #1c1e21;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .sidebar li:hover {
+      background-color: #f0f2f5;
+    }
+
+    /* Feed */
+    .feed {
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .post-box {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .post-box textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      font-size: 16px;
+      outline: none;
+      height: 60px;
+    }
+
+    .post-box button {
+      background-color: #1877f2;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 10px 15px;
+      cursor: pointer;
+      float: right;
+    }
+
+    .post-box button:hover {
+      background-color: #166fe5;
+    }
+
+    .post {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .post-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .post-header .name {
+      font-weight: bold;
+    }
+
+    .post-content {
+      margin-top: 10px;
+      font-size: 15px;
+      color: #1c1e21;
+    }
+
+    .post-actions {
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-around;
+      color: #65676b;
+      font-weight: bold;
+    }
+
+    .post-actions span {
+      cursor: pointer;
+    }
+
+    .post-actions span:hover {
+      color: #1877f2;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .sidebar {
+        width: 90%;
+      }
+
+      .feed {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra superior -->
+  <header>
+    <div class="logo">facebook</div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Pesquisar no Facebook" id="search">
+    </div>
+
+    <div class="user-menu">
+      <img src="https://i.pravatar.cc/50" alt="Perfil" id="user-photo">
+      <button id="logout">Sair</button>
+    </div>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <main>
+    <!-- Menu lateral -->
+    <aside class="sidebar">
+      <h3>Atalhos</h3>
+      <ul>
+        <li id="home">Página inicial</li>
+        <li id="friends">Amigos</li>
+        <li id="groups">Grupos</li>
+        <li id="marketplace">Marketplace</li>
+        <li id="videos">Vídeos</li>
+      </ul>
+    </aside>
+
+    <!-- Feed -->
+    <section class="feed">
+      <div class="post-box">
+        <textarea id="post-text" placeholder="No que você está pensando?"></textarea>
+        <button id="publish">Publicar</button>
+      </div>
+
+      <div class="post">
+        <div class="post-header">
+          <img src="https://i.pravatar.cc/41" alt="Usuário">
+          <div class="name">Maria Silva</div>
+        </div>
+        <div class="post-content">Que dia lindo hoje ☀️💙</div>
+        <div class="post-actions">
+          <span>Curtir</span>
+          <span>Comentar</span>
+          <span>Compartilhar</span>
+        </div>
+      </div>
+
+      <div class="post">
+        <div class="post-header">
+          <img src="https://i.pravatar.cc/42" alt="Usuário">
+          <div class="name">Carlos Santos</div>
+        </div>
+        <div class="post-content">Acabei de terminar meu projeto! 🎉</div>
+        <div class="post-actions">
+          <span>Curtir</span>
+          <span>Comentar</span>
+          <span>Compartilhar</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

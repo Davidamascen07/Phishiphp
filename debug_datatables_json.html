@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Debug DataTables JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .debug-box {
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .error { border-color: #dc3545; background: #f8d7da; }
+        .success { border-color: #28a745; background: #d4edda; }
+        .code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-primary { background: #007bff; }
+        .btn-success { background: #28a745; }
+        .btn-danger { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug DataTables JSON Response</h1>
+    
+    <div class="debug-box">
+        <h3>📊 Teste das Requisições DataTables</h3>
+        <p>Este teste vai simular a requisição que o DataTables faz e mostrar exatamente o que está sendo retornado.</p>
+        <button onclick="testOriginalEndpoint()" class="btn btn-primary">🔧 Testar Endpoint Original</button>
+        <button onclick="testFixedEndpoint()" class="btn btn-success">✅ Testar Endpoint Corrigido</button>
+        <button onclick="testRawResponse()" class="btn btn-danger">🔍 Ver Resposta Raw</button>
+    </div>
+
+    <div class="debug-box">
+        <h3>📋 Resultados do Teste</h3>
+        <div id="results" class="code">Clique nos botões acima para testar...</div>
+    </div>
+
+    <script>
+        function testOriginalEndpoint() {
+            const requestData = {
+                action_type: "get_table_webpage_visit_form_submission",
+                tracker_id: "daxn8c",
+                page: 0,
+                start: 0,
+                length: 10,
+                draw: 1,
+                search: { value: "" },
+                order: [{ column: 0, dir: "asc" }],
+                columns: [
+                    { data: "rid" },
+                    { data: "public_ip" },
+                    { data: "time" },
+                    { data: "browser" },
+                    { data: "platform" }
+                ],
+                selected_col: ["rid", "public_ip", "time", "browser", "platform"]
+            };
+
+            document.getElementById('results').textContent = 'Testando endpoint original...\n';
+
+            fetch('https://loophish.local/spear/manager/tracker_report_manager.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                document.getElementById('results').textContent += `Status: ${response.status}\n`;
+                document.getElementById('results').textContent += `Headers: ${JSON.stringify([...response.headers])}\n\n`;
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById('results').textContent += `RESPOSTA RAW:\n`;
+                document.getElementById('results').textContent += `Length: ${data.length} bytes\n`;
+                document.getElementById('results').textContent += `Content:\n${data}\n\n`;
+                
+                // Tentar parsear JSON
+                try {
+                    const jsonData = JSON.parse(data);
+                    document.getElementById('results').textContent += `TESTE JSON:\n✅ JSON VÁLIDO!\n`;
+                    document.getElementById('results').textContent += `Keys: ${Object.keys(jsonData).join(', ')}\n`;
+                    if (jsonData.data) {
+                        document.getElementById('results').textContent += `Data Count: ${jsonData.data.length}\n`;
+                    }
+                    document.getElementById('results').textContent += `Records Total: ${jsonData.recordsTotal}\n`;
+                    document.getElementById('results').textContent += JSON.stringify(jsonData, null, 2);
+                } catch (e) {
+                    document.getElementById('results').textContent += `ERRO JSON:\n❌ ${e.message}\n\n`;
+                    
+                    // Analisar caracteres problemáticos
+                    const firstChars = data.substring(0, 100);
+                    const lastChars = data.substring(data.length - 100);
+                    document.getElementById('results').textContent += `PRIMEIROS 100 CHARS:\n${JSON.stringify(firstChars)}\n\n`;
+                    document.getElementById('results').textContent += `ÚLTIMOS 100 CHARS:\n${JSON.stringify(lastChars)}\n`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('results').textContent += `ERRO FETCH:\n${error}\n`;
+            });
+        }
+
+        function testFixedEndpoint() {
+            const requestData = {
+                action_type: "get_table_webpage_visit_form_submission",
+                tracker_id: "daxn8c",
+                page: 0,
+                start: 0,
+                length: 10,
+                draw: 1,
+                search: { value: "" },
+                order: [{ column: 0, dir: "asc" }],
+                columns: [
+                    { data: "rid" },
+                    { data: "public_ip" },
+                    { data: "time" },
+                    { data: "browser" },
+                    { data: "platform" }
+                ],
+                selected_col: ["rid", "public_ip", "time", "browser", "platform"]
+            };
+
+            document.getElementById('results').textContent = 'Testando endpoint corrigido...\n';
+
+            fetch('https://loophish.local/spear/manager/tracker_report_manager_fixed.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                document.getElementById('results').textContent += `Status: ${response.status}\n`;
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById('results').textContent += `RESPOSTA CORRIGIDA:\n`;
+                document.getElementById('results').textContent += `Length: ${data.length} bytes\n`;
+                document.getElementById('results').textContent += `Content:\n${data}\n\n`;
+                
+                try {
+                    const jsonData = JSON.parse(data);
+                    document.getElementById('results').textContent += `✅ ENDPOINT CORRIGIDO FUNCIONA!\n`;
+                    document.getElementById('results').textContent += JSON.stringify(jsonData, null, 2);
+                } catch (e) {
+                    document.getElementById('results').textContent += `❌ Ainda há problema: ${e.message}\n`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('results').textContent += `ERRO: ${error}\n`;
+            });
+        }
+
+        function testRawResponse() {
+            document.getElementById('results').textContent = 'Fazendo requisição raw...\n';
+
+            // Usar XMLHttpRequest para ver resposta byte por byte
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://loophish.local/spear/manager/tracker_report_manager.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onload = function() {
+                const response = xhr.responseText;
+                document.getElementById('results').textContent = `RAW RESPONSE ANALYSIS:\n`;
+                document.getElementById('results').textContent += `Status: ${xhr.status}\n`;
+                document.getElementById('results').textContent += `Length: ${response.length}\n\n`;
+                
+                // Mostrar cada byte
+                document.getElementById('results').textContent += `FIRST 200 BYTES (char codes):\n`;
+                for (let i = 0; i < Math.min(200, response.length); i++) {
+                    const char = response[i];
+                    const code = response.charCodeAt(i);
+                    document.getElementById('results').textContent += `${i}: '${char}' (${code})\n`;
+                }
+                
+                document.getElementById('results').textContent += `\nFULL RESPONSE:\n${response}`;
+            };
+            
+            const requestData = {
+                action_type: "get_table_webpage_visit_form_submission",
+                tracker_id: "daxn8c",
+                page: 0,
+                start: 0,
+                length: 10,
+                draw: 1,
+                search: { value: "" },
+                order: [{ column: 0, dir: "asc" }],
+                columns: [{ data: "rid" }, { data: "public_ip" }, { data: "time" }, { data: "browser" }, { data: "platform" }],
+                selected_col: ["rid", "public_ip", "time", "browser", "platform"]
+            };
+            
+            xhr.send(JSON.stringify(requestData));
+        }
+    </script>
+</body>
+</html>

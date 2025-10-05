@@ -16,10 +16,15 @@ if(isset($POSTJ['sp_ver']))
     die("success");
 //--------------------------
 
-if(isset($POSTJ['rid']) && !empty($POSTJ['rid']))
-    $rid = doFilter($POSTJ['rid'],'ALPHA_NUM');
-else
-    die("No rid");
+// RID handling - allow empty RID and preserve common characters (fix for tracker without rid parameter)
+if(isset($POSTJ['rid'])) {
+    // More permissive filter for RID - allow alphanumeric, underscore, hyphen, dot
+    $rid = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $POSTJ['rid']);
+    // Limit length for security
+    $rid = substr($rid, 0, 100);
+} else {
+    $rid = ''; // Allow empty RID instead of dying
+}
     
 if(isset($POSTJ['sess_id']))
     $session_id = doFilter($POSTJ['sess_id'],'ALPHA_NUM');

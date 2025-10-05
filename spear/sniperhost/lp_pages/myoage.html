@@ -1,0 +1,664 @@
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Executivo - Simulação de Phishing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: #f7fafc;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            min-height: 297mm;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1E90FF 0%, #0066CC 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo::before {
+            content: "🎣";
+            font-size: 24px;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .company-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .report-meta {
+            text-align: right;
+        }
+
+        .report-meta h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .report-meta p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1E90FF;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 2px;
+        }
+
+        /* Executive Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #1E90FF;
+        }
+
+        .summary-card h3 {
+            font-size: 16px;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .summary-card .highlight {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1E90FF;
+            margin-bottom: 5px;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .email-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .click-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .data-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .training-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .open-icon { background: linear-gradient(135deg, #FFD54F, #FFA000);box-shadow: 0 4px 10px rgba(255, 193, 7, 0.25); /* leve destaque */
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        .metric-change.positive {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .metric-change.negative {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        /* Progress Bars */
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .progress-item {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .progress-value {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1E90FF;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-danger { background: linear-gradient(90deg, #fc8181, #f56565); }
+        .progress-warning { background: linear-gradient(90deg, #fbb6ce, #ed64a6); }
+        .progress-success { background: linear-gradient(90deg, #68d391, #48bb78); }
+
+        /* Tables */
+        .ranking-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .ranking-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #1E90FF, #0066CC);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+        }
+
+        .table-row {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 15px;
+        }
+
+        .rank-1 { background: #ffd700; color: #744210; }
+        .rank-2 { background: #c0c0c0; color: #4a5568; }
+        .rank-3 { background: #cd7f32; color: white; }
+        .rank-4, .rank-5 { background: #e2e8f0; color: #4a5568; }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .user-department {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .risk-score {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .risk-high { background: #fed7d7; color: #742a2a; }
+        .risk-medium { background: #feebc8; color: #744210; }
+        .risk-low { background: #c6f6d5; color: #22543d; }
+
+        /* Chart Placeholder */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-placeholder {
+            height: 250px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            font-size: 16px;
+            border: 2px dashed #cbd5e0;
+        }
+
+        /* Footer */
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 30px 40px;
+            margin-top: 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .footer h3 {
+            margin-bottom: 15px;
+        }
+
+        .footer p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: none;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+        /* Logo: vira uma caixinha que contém a imagem */
+        .logo {
+        width: 64px;          /* ajuste se quiser maior/menor */
+        height: 64px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;      /* evita “sobras” da imagem */
+        border: 1px solid rgba(0,0,0,.06);
+        }
+
+        /* remove o emoji que empurra tudo */
+        .logo::before { content: none; }
+
+        /* A imagem ocupa a caixa sem distorcer */
+        .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;   /* mostra a imagem inteira */
+        display: block;
+        }
+
+        /* Header mais resiliente em telas menores */
+        .header {
+        background: linear-gradient(135deg, #1E90FF 0%, #0066CC 100%);
+        color: white;
+        padding: 30px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;             /* espaço entre logo e texto */
+        flex-wrap: wrap;       /* evita quebra feia no mobile */
+        }
+
+        /* Ajuste fino para telas pequenas */
+        @media (max-width: 600px) {
+        .logo { width: 48px; height: 48px; }
+        .company-info h1 { font-size: 20px; }
+}
+    </style>
+
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo"><img src="escudo.png" alt="Logo"> </div>
+                <div class="company-info">
+                    <h1>LooPhish</h1>
+                    <p>seu ciclo contínuo contra o phishing</p>
+                </div>
+            </div>
+            <div class="report-meta">
+                <h2>Relatório Executivo</h2>
+                <p>Simulação de Phishing</p>
+                <p>02 de Janeiro 2025</p>
+                <p>Tema: [Nome do modelo do email]</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="section">
+                <h2 class="section-title">📊 Resumo Executivo</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Taxa de Sucesso da Campanha</h3>
+                        <div class="highlight">23%</div>
+                        <p>dos funcionários foram vulneráveis a ataques de phishing</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Nível de Risco Organizacional</h3>
+                        <div class="highlight" style="color: #e53e3e;">ALTO</div>
+                        <p>Requer ação imediata e treinamento intensivo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="section">
+                <h2 class="section-title">📈 Métricas Principais</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon email-icon">📧</div>
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">E-mails Enviados</div>
+                        <div class="metric-change positive">Total</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon open-icon">📨</div>
+                        <div class="metric-value">400</div>
+                        <div class="metric-label">Emails Abertos</div>
+                        <div class="metric-change positive">40.6% taxa</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon click-icon">👆</div>
+                        <div class="metric-value">394</div>
+                        <div class="metric-label">Cliques no Link</div>
+                        <div class="metric-change negative">31.6% taxa</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon data-icon">🔓</div>
+                        <div class="metric-value">127</div>
+                        <div class="metric-label">Dados Enviados</div>
+                        <div class="metric-change negative">10.2% taxa</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon training-icon">🎓</div>
+                        <div class="metric-value">892</div>
+                        <div class="metric-label">Treinamentos Concluídos</div>
+                        <div class="metric-change positive">71.5% taxa</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Analysis -->
+            <div class="section">
+                <h2 class="section-title">📋 Análise de Progresso</h2>
+                <div class="progress-section">
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Taxa de Abertura de E-mail</span>
+                            <span class="progress-value">68.4%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-warning" style="width: 68.4%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Taxa de Cliques</span>
+                            <span class="progress-value">31.6%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-danger" style="width: 31.6%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Taxa de Envio de Dados</span>
+                            <span class="progress-value">10.2%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-danger" style="width: 10.2%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Taxa de Treinamento</span>
+                            <span class="progress-value">71.5%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-success" style="width: 71.5%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rankings -->
+            <div class="section">
+                <h2 class="section-title">⚠️ Usuários e Departamentos Críticos</h2>
+                <div class="ranking-grid">
+                    <div class="ranking-table">
+                        <div class="table-header">Top 5 Usuários Mais Críticos</div>
+                        <div class="table-row">
+                            <div class="rank-number rank-1">1</div>
+                            <div class="user-info">
+                                <div class="user-name">Maria Silva</div>
+                                <div class="user-department">Financeiro</div>
+                            </div>
+                            <div class="risk-score risk-high">ALTO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-2">2</div>
+                            <div class="user-info">
+                                <div class="user-name">João Santos</div>
+                                <div class="user-department">RH</div>
+                            </div>
+                            <div class="risk-score risk-high">ALTO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-3">3</div>
+                            <div class="user-info">
+                                <div class="user-name">Ana Costa</div>
+                                <div class="user-department">Vendas</div>
+                            </div>
+                            <div class="risk-score risk-medium">MÉDIO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-4">4</div>
+                            <div class="user-info">
+                                <div class="user-name">Pedro Lima</div>
+                                <div class="user-department">Marketing</div>
+                            </div>
+                            <div class="risk-score risk-medium">MÉDIO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-5">5</div>
+                            <div class="user-info">
+                                <div class="user-name">Carla Souza</div>
+                                <div class="user-department">Operações</div>
+                            </div>
+                            <div class="risk-score risk-medium">MÉDIO</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-table">
+                        <div class="table-header">Top 3 Departamentos Críticos</div>
+                        <div class="table-row">
+                            <div class="rank-number rank-1">1</div>
+                            <div class="user-info">
+                                <div class="user-name">Financeiro</div>
+                                <div class="user-department">43% de vulnerabilidade</div>
+                            </div>
+                            <div class="risk-score risk-high">CRÍTICO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-2">2</div>
+                            <div class="user-info">
+                                <div class="user-name">Recursos Humanos</div>
+                                <div class="user-department">38% de vulnerabilidade</div>
+                            </div>
+                            <div class="risk-score risk-high">ALTO</div>
+                        </div>
+                        <div class="table-row">
+                            <div class="rank-number rank-3">3</div>
+                            <div class="user-info">
+                                <div class="user-name">Vendas</div>
+                                <div class="user-department">31% de vulnerabilidade</div>
+                            </div>
+                            <div class="risk-score risk-medium">MÉDIO</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section">
+                <h2 class="section-title">💡 Recomendações</h2>
+                <div style="background: #f7fafc; padding: 25px; border-radius: 12px; border-left: 4px solid #FFD700;">
+                    <h3 style="color: #2d3748; margin-bottom: 15px;">Ações Imediatas Recomendadas:</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                            <span style="position: absolute; left: 0; top: 0; color: #FFD700;">🎯</span>
+                            Implementar treinamento recorrente
+                        </li>
+                        <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                            <span style="position: absolute; left: 0; top: 0; color: #FFD700;">🔒</span>
+                            Reforçar políticas de segurança para usuários de alto risco
+                        </li>
+                        <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                            <span style="position: absolute; left: 0; top: 0; color: #FFD700;">📚</span>
+                            Aumentar frequência de simulações de phishing
+                        </li>
+                        <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                            <span style="position: absolute; left: 0; top: 0; color: #FFD700;">🛡️</span>
+                            Criar uma caixa de e-mail dedicada para que os usuários encaminhem mensagens suspeitas e recebam análise especializada.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div>
+                    <h3>Sobre este Relatório</h3>
+                    <p>Este relatório foi gerado automaticamente pela plataforma LooPhish com base na simulação de phishing realizada no período de Janeiro de 2025. Os dados apresentados refletem o comportamento real dos usuários diante de tentativas de phishing simuladas.</p>
+                </div>
+                <div>
+                    <h3>Contato</h3>
+                    <p>Para mais informações sobre este relatório ou sobre as soluções LooPhish, entre em contato através do e-mail: info@loophish.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+

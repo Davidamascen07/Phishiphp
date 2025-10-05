@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Debug TrackerGenerator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>🐛 Debug TrackerGenerator Flow</h2>
+    
+    <div>
+        <h3>Testar Fluxo de Steps:</h3>
+        <ol>
+            <li><strong>Step 0:</strong> Start (Tracker Name + Webhook URL)</li>
+            <li><strong>Step 1:</strong> Training Integration (Novo)</li>
+            <li><strong>Step 2:</strong> Web Pages (Antigo Step 1)</li>
+            <li><strong>Step 3:</strong> Output (Antigo Step 2)</li>
+        </ol>
+    </div>
+    
+    <div>
+        <h3>Problema Identificado:</h3>
+        <p>O sistema estava validando apenas Steps 0 e 1, mas com a adição da nova seção "Training Integration", 
+        os índices mudaram:</p>
+        
+        <table border="1" style="border-collapse: collapse; margin: 10px 0;">
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 8px;">Antes (Original)</th>
+                <th style="padding: 8px;">Depois (Com Training)</th>
+            </tr>
+            <tr>
+                <td style="padding: 8px;">Step 0: Start</td>
+                <td style="padding: 8px;">Step 0: Start</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;">Step 1: Web Pages</td>
+                <td style="padding: 8px;">Step 1: Training Integration (NOVO)</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;">Step 2: Output</td>
+                <td style="padding: 8px;">Step 2: Web Pages</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;">-</td>
+                <td style="padding: 8px;">Step 3: Output</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div>
+        <h3>✅ Solução Implementada:</h3>
+        <ul>
+            <li>✅ Corrigido indices de validação dos steps</li>
+            <li>✅ Adicionado debug console.log() para rastrear steps</li>
+            <li>✅ Validação opcional para Training Integration (só valida se habilitado)</li>
+            <li>✅ CSS para validação do Select2</li>
+            <li>✅ Evento change para remover erro de validação</li>
+        </ul>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <a href="http://loophish.local/spear/TrackerGenerator.php" 
+           style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+           🚀 Testar TrackerGenerator Atualizado
+        </a>
+    </div>
+    
+    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+        <h4>📝 Como Testar:</h4>
+        <ol>
+            <li>Abra o TrackerGenerator</li>
+            <li>Preencha nome do tracker</li>
+            <li>Clique Next (deve ir para Training Integration)</li>
+            <li>Deixe training desabilitado e clique Next (deve funcionar)</li>
+            <li>Volte, habilite training e não selecione módulo, clique Next (deve dar erro)</li>
+            <li>Selecione um módulo e clique Next (deve funcionar)</li>
+            <li>Continue o fluxo normal</li>
+        </ol>
+        
+        <p><strong>💡 Dica:</strong> Abra o Console do navegador (F12) para ver os logs de debug!</p>
+    </div>
+
+</body>
+</html>
