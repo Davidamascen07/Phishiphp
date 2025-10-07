@@ -24,15 +24,48 @@ var dic_all_col={rid:'RID', user_name:'Name', user_email:'Email', sending_status
 $(function() {
     loadTableCampaignList();
     Prism.highlightAll();
+    
+    // Inicializar Select2 após carregamento da página
+    initializeSearchableSelects();
+    
+    // Re-inicializar Select2 quando o modal for mostrado
+    $('#ModalCampaignList').on('shown.bs.modal', function () {
+        initializeSearchableSelects();
+    });
 });
 
+function initializeSearchableSelects() {
+    // Destruir qualquer instância existente primeiro
+    $("#modal_mailcamp_selector").select2('destroy');
+    $("#modal_web_tracker_selector").select2('destroy');
+    
+    // Reinicializar com configurações de pesquisa
+    $("#modal_mailcamp_selector").select2({
+        placeholder: "Pesquisar Mail Campaign...",
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#ModalCampaignList') // Garante que o dropdown funcione dentro do modal
+    }); 
+
+    $("#modal_web_tracker_selector").select2({
+        placeholder: "Pesquisar Web Tracker...",
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#ModalCampaignList') // Garante que o dropdown funcione dentro do modal
+    });
+}
+
+// Inicializar Select2 com configurações simples primeiro
 $("#modal_mailcamp_selector").select2({
-    minimumResultsForSearch: -1,
-    placeholder: "Select Mail Campaign",
+    placeholder: "Pesquisar Mail Campaign...",
+    allowClear: true,
+    width: '100%'
 }); 
+
 $("#modal_web_tracker_selector").select2({
-    minimumResultsForSearch: -1,
-    placeholder: "Select Web Tracker",
+    placeholder: "Pesquisar Web Tracker...",
+    allowClear: true,
+    width: '100%'
 });  
 $("#modal_export_report_selector").select2({
     minimumResultsForSearch: -1,
@@ -167,15 +200,28 @@ function loadTableCampaignList() {
             web_mailcamp_list = data;
             if(!data.mailcamp_list.error){
                 $.each(data.mailcamp_list, function(key, value) {
-                    if(value.camp_status == 2 || value.camp_status == 3 || value.camp_status == 4) //removes inactive and scheduled
-                        $("#modal_mailcamp_selector").append(`<option value="` + value.campaign_id + `">` + value.campaign_name + `</option>`);
+                    if(value.camp_status == 2 || value.camp_status == 3 || value.camp_status == 4) { //removes inactive and scheduled
+                        // Adiciona informações detalhadas para facilitar a pesquisa
+                        var displayText = value.campaign_name + " (" + value.date + ")";
+                        var statusText = value.camp_status == 2 ? "Em andamento" : 
+                                        value.camp_status == 3 ? "Completa" : 
+                                        value.camp_status == 4 ? "Em andamento" : "Desconhecido";
+                        $("#modal_mailcamp_selector").append(`<option value="` + value.campaign_id + `" data-status="` + statusText + `" data-date="` + value.date + `">` + displayText + `</option>`);
+                    }
                 });
             }
             if(!data.webtracker_list.error){
                 $.each(data.webtracker_list, function(key, value) {
-                    if(!(value['start_time'] == undefined || value.start_time == '')) //removes not started
-                        $("#modal_web_tracker_selector").append(`<option value="` + value.tracker_id + `">` + value.tracker_name + `</option>`);
+                    if(!(value['start_time'] == undefined || value.start_time == '')) { //removes not started
+                        // Adiciona informações detalhadas para facilitar a pesquisa
+                        var displayText = value.tracker_name + " (" + value.date + ")";
+                        var statusText = value.active == 1 ? "Ativo" : "Inativo";
+                        $("#modal_web_tracker_selector").append(`<option value="` + value.tracker_id + `" data-status="` + statusText + `" data-date="` + value.date + `">` + displayText + `</option>`);
+                    }
                 });
+
+                // Re-inicializar Select2 após carregar os dados
+                initializeSearchableSelects();
 
                 if (g_campaign_id == '' && g_tracker_id == '')
                     $("#ModalCampaignList").modal("toggle");
@@ -1098,7 +1144,8 @@ function loadTableCampaignResult() {
         drawCallback: function() {
             applyCellColors();
             $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
-            $("label>select").select2({minimumResultsForSearch: -1, });
+            // Aplicar Select2 apenas aos selects de paginação, excluindo nossos campos de pesquisa
+            $("label>select:not(#modal_mailcamp_selector):not(#modal_web_tracker_selector)").select2({minimumResultsForSearch: -1, });
         }
     });
 }

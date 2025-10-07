@@ -642,8 +642,12 @@
                         <span id="currentClientName">Carregando...</span>
                     </button>
                     <ul class="dropdown-menu client-dropdown-menu" id="headerClientDropdown">
-                        <li><h6 class="dropdown-header">Selecionar Cliente</h6></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <h6 class="dropdown-header">Selecionar Cliente</h6>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li class="text-center">
                             <div class="spinner-border spinner-border-sm" role="status">
                                 <span class="visually-hidden">Carregando...</span>
@@ -815,54 +819,54 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
         }
         // Adicionar funcionalidade de seletor de cliente
         loadHeaderClientSelector();
-        
+
         function loadHeaderClientSelector() {
             // Carregar clientes disponíveis
             fetch('/spear/manager/session_api.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'getUserAccessibleClients'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getUserAccessibleClients'
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateHeaderClientSelector(data.clients, data.currentClientId, data.currentClientName);
-                } else {
-                    console.error('Erro ao carregar clientes:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Erro na requisição:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateHeaderClientSelector(data.clients, data.currentClientId, data.currentClientName);
+                    } else {
+                        console.error('Erro ao carregar clientes:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                });
         }
-        
+
         function updateHeaderClientSelector(clients, currentClientId, currentClientName) {
             const clientNameSpan = document.getElementById('currentClientName');
             const dropdown = document.getElementById('headerClientDropdown');
-            
+
             if (clientNameSpan) {
                 clientNameSpan.textContent = currentClientName || 'Nenhum cliente';
             }
-            
+
             if (dropdown && clients) {
                 let dropdownHtml = '<li><h6 class="dropdown-header">Selecionar Cliente</h6></li>';
                 dropdownHtml += '<li><hr class="dropdown-divider"></li>';
-                
+
                 clients.forEach(client => {
                     // Validar dados do cliente antes de gerar HTML
                     if (!client.client_id || !client.client_name) {
                         console.warn('Cliente com dados inválidos ignorado:', client);
                         return;
                     }
-                    
+
                     const clientId = String(client.client_id).replace(/'/g, "\\'");
                     const clientName = String(client.client_name).replace(/'/g, "\\'");
                     const isActive = client.client_id === currentClientId ? 'active' : '';
-                    
+
                     dropdownHtml += `
                         <li>
                             <a class="dropdown-item ${isActive}" href="#" onclick="changeHeaderClient('${clientId}', '${clientName}')">
@@ -872,7 +876,7 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
                         </li>
                     `;
                 });
-                
+
                 dropdown.innerHTML = dropdownHtml;
             }
         }
@@ -893,103 +897,106 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
         if (typeof toastr !== 'undefined') {
             toastr.info('Alterando cliente...');
         }
-        
+
         fetch('manager/session_api.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'setClientContext',
-                clientId: clientId
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na resposta do servidor: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Verificar se a sessão foi realmente alterada
-                return fetch('manager/session_api.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'getCurrentClientContext'
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'setClientContext',
+                    clientId: clientId
                 })
-                .then(response => response.json())
-                .then(currentData => {
-                    console.log('Verificação da troca:', currentData);
-                    console.log('Cliente esperado:', clientId);
-                    console.log('Cliente atual:', currentData.clientId);
-                    
-                    if (currentData.success && currentData.clientId === clientId) {
-                        // Sucesso confirmado - atualizar interface
-                        const currentClientNameEl = document.getElementById('currentClientName');
-                        if (currentClientNameEl) {
-                            currentClientNameEl.textContent = clientName;
-                        }
-                        
-                        // Atualizar classes ativas no dropdown
-                        const dropdownItems = document.querySelectorAll('#headerClientDropdown .dropdown-item');
-                        dropdownItems.forEach(item => {
-                            item.classList.remove('active');
-                            if (item.textContent.trim().includes(clientName)) {
-                                item.classList.add('active');
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Verificar se a sessão foi realmente alterada
+                    return fetch('manager/session_api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'getCurrentClientContext'
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(currentData => {
+                            console.log('Verificação da troca:', currentData);
+                            console.log('Cliente esperado:', clientId);
+                            console.log('Cliente atual:', currentData.clientId);
+
+                            if (currentData.success && currentData.clientId === clientId) {
+                                // Sucesso confirmado - atualizar interface
+                                const currentClientNameEl = document.getElementById('currentClientName');
+                                if (currentClientNameEl) {
+                                    currentClientNameEl.textContent = clientName;
+                                }
+
+                                // Atualizar classes ativas no dropdown
+                                const dropdownItems = document.querySelectorAll('#headerClientDropdown .dropdown-item');
+                                dropdownItems.forEach(item => {
+                                    item.classList.remove('active');
+                                    if (item.textContent.trim().includes(clientName)) {
+                                        item.classList.add('active');
+                                    }
+                                });
+
+                                // Fechar dropdown
+                                if (typeof closeAllDropdowns === 'function') {
+                                    closeAllDropdowns();
+                                }
+
+                                // Disparar evento para sincronizar outras partes da página
+                                const event = new CustomEvent('clientChanged', {
+                                    detail: {
+                                        clientId: clientId,
+                                        clientName: clientName
+                                    }
+                                });
+                                window.dispatchEvent(event);
+
+                                // Mostrar mensagem de sucesso
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.success(`Cliente alterado para: ${clientName}`);
+                                }
+
+                                // Recarregar dados imediatamente sem recarregar a página
+                                if (typeof window.reloadClientData === 'function') {
+                                    window.reloadClientData();
+                                }
+
+                                // Recarregar página como fallback após um tempo menor
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 800);
+                            } else {
+                                console.error('Falha na verificação da troca de cliente:');
+                                console.error('- currentData.success:', currentData.success);
+                                console.error('- currentData.clientId:', currentData.clientId);
+                                console.error('- clientId esperado:', clientId);
+                                console.error('- currentData completa:', currentData);
+                                throw new Error('Falha na verificação da troca de cliente: esperado=' + clientId + ', atual=' + (currentData.clientId || 'undefined'));
                             }
                         });
-                        
-                        // Fechar dropdown
-                        if (typeof closeAllDropdowns === 'function') {
-                            closeAllDropdowns();
-                        }
-                        
-                        // Disparar evento para sincronizar outras partes da página
-                        const event = new CustomEvent('clientChanged', {
-                            detail: { clientId: clientId, clientName: clientName }
-                        });
-                        window.dispatchEvent(event);
-                        
-                        // Mostrar mensagem de sucesso
-                        if (typeof toastr !== 'undefined') {
-                            toastr.success(`Cliente alterado para: ${clientName}`);
-                        }
-                        
-                        // Recarregar dados imediatamente sem recarregar a página
-                        if (typeof window.reloadClientData === 'function') {
-                            window.reloadClientData();
-                        }
-                        
-                        // Recarregar página como fallback após um tempo menor
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 800);
-                    } else {
-                        console.error('Falha na verificação da troca de cliente:');
-                        console.error('- currentData.success:', currentData.success);
-                        console.error('- currentData.clientId:', currentData.clientId);
-                        console.error('- clientId esperado:', clientId);
-                        console.error('- currentData completa:', currentData);
-                        throw new Error('Falha na verificação da troca de cliente: esperado=' + clientId + ', atual=' + (currentData.clientId || 'undefined'));
-                    }
-                });
-            } else {
-                throw new Error(data.message || 'Erro desconhecido ao alterar cliente');
-            }
-        })
-        .catch(error => {
-            console.error('Erro na requisição de troca de cliente:', error);
-            if (typeof toastr !== 'undefined') {
-                toastr.error('Erro ao alterar cliente: ' + error.message);
-            } else {
-                alert('Erro ao alterar cliente: ' + error.message);
-            }
-        });
+                } else {
+                    throw new Error(data.message || 'Erro desconhecido ao alterar cliente');
+                }
+            })
+            .catch(error => {
+                console.error('Erro na requisição de troca de cliente:', error);
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Erro ao alterar cliente: ' + error.message);
+                } else {
+                    alert('Erro ao alterar cliente: ' + error.message);
+                }
+            });
     }
 
     // Tornar função disponível globalmente
@@ -999,18 +1006,22 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
     window.debugClientChange = function() {
         console.log('=== DEBUG TROCA DE CLIENTE ===');
         fetch('manager/session_api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getCurrentClientContext' })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Cliente atual na sessão:', data);
-            const selector = document.getElementById('currentClientName');
-            console.log('Elemento currentClientName:', selector);
-            console.log('Texto atual do elemento:', selector ? selector.textContent : 'não encontrado');
-        })
-        .catch(error => console.error('Erro no debug:', error));
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'getCurrentClientContext'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cliente atual na sessão:', data);
+                const selector = document.getElementById('currentClientName');
+                console.log('Elemento currentClientName:', selector);
+                console.log('Texto atual do elemento:', selector ? selector.textContent : 'não encontrado');
+            })
+            .catch(error => console.error('Erro no debug:', error));
     };
 
     // Global function to reload client data
@@ -1030,7 +1041,7 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
             console.warn('toggleSubmenu: ID não fornecido ou vazio');
             return;
         }
-        
+
         const submenu = document.getElementById('submenu-' + id);
         const menuItem = event.currentTarget;
 
@@ -1206,6 +1217,9 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
             <a href="/spear/ClientList" class="submenu-item">
                 <i class="mdi mdi-format-list-bulleted"></i> Lista de Clientes
             </a>
+            <a href="/spear/UserManagement" class="submenu-item">
+                <i class="mdi mdi-account-multiple"></i> Gestão de Usuários
+            </a>
         </div>
 
         <!-- Módulo de Treinamentos -->
@@ -1224,6 +1238,9 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
             </a>
             <a href="/spear/TrainingCertificates" class="submenu-item">
                 <i class="mdi mdi-certificate"></i> Certificados
+            </a>
+            <a href="/spear/TrainingQuestions" class="submenu-item">
+                <i class="mdi mdi-certificate"></i> Questão
             </a>
         </div>
 

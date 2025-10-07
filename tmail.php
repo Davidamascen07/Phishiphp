@@ -1,8 +1,12 @@
 <?php
 require_once(dirname(__FILE__) . '/spear/config/db.php');
 require_once(dirname(__FILE__) . '/spear/manager/common_functions.php');
+require_once(dirname(__FILE__) . '/spear/manager/user_campaign_hooks.php');
 require_once(dirname(__FILE__) . '/spear/libs/browser_detect/BrowserDetection.php');
 date_default_timezone_set('UTC');
+
+// Log da requisição para debug
+error_log("Email tracking request - GET: " . print_r($_GET, true));
 
 if(isset($_GET['rid']))
     $user_id = doFilter($_GET['rid'],'ALPHA_NUM');
@@ -20,6 +24,13 @@ if(isset($_GET['mtid'])){
 }
 else
     $mail_template_id = 'Failed';
+
+// Verificações de segurança
+if ($user_id === 'Failed' || $campaign_id === 'Failed' || $mail_template_id === 'Failed') {
+    error_log("Email tracking - Invalid parameters: rid=$user_id, mid=$campaign_id, mtid=$mail_template_id");
+    displayImage($mail_template_id);
+    exit;
+}
 
 $ua_info = new Wolfcast\BrowserDetection();
 $public_ip = getPublicIP();
@@ -105,6 +116,11 @@ if(verifyMailCmapaign($conn, $campaign_id) == true && $user_details != 'empty'){
     $stmt = $conn->prepare("UPDATE tb_data_mailcamp_live SET mail_open_times=?,public_ip=?,ip_info=?,user_agent=?,mail_client=?,platform=?,device_type=?,all_headers=? WHERE campaign_id=? AND rid=?");
     $stmt->bind_param('ssssssssss', $mail_open_times,$public_ip,$ip_info,$user_agent,$mail_client,$user_os,$device_type,$allHeaders,$campaign_id,$user_id);
     $stmt->execute();
+    
+    // Hook: Registrar abertura de email
+    if (!empty($user_details['user_email'])) {
+        onEmailOpened($conn, $user_details['user_email'], $campaign_id);
+    }
 }
 
 function displayImage($mail_template_id){
@@ -122,13 +138,16 @@ displayImage($mail_template_id);
 
 //-----------------------------------------
 function verifyMailCmapaign($conn, $campaign_id){
-    $stmt = $conn->prepare("SELECT scheduled_time,camp_status FROM tb_core_mailcamp_list where campaign_id = ?");
+    // Verificar se a campanha existe e está ativa
+    $stmt = $conn->prepare("SELECT scheduled_time,camp_status,client_id FROM tb_core_mailcamp_list where campaign_id = ?");
     $stmt->bind_param("s", $campaign_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if($row = $result->fetch_assoc()){
-        if($row['camp_status'] == 2 || $row['camp_status'] == 4)//If in-progress
-          return true;
+        if($row['camp_status'] == 2 || $row['camp_status'] == 4) { //If in-progress
+            // TODO: Adicionar verificação de client_id quando necessário
+            return true;
+        }
     } 
     return false;
 }
@@ -139,10 +158,14 @@ function verifyMailCmapaignUser($conn, $campaign_id, $id){
     $stmt->execute();
     $result = $stmt->get_result();
     if($result->num_rows > 0){
-        $row = $result->fetch_assoc() ;
+        $row = $result->fetch_assoc();
+        // Log para debug
+        error_log("Email tracking - Campaign: $campaign_id, RID: $id, Email: " . $row['user_email']);
         return $row;
     }
-    else    
+    else {
+        error_log("Email tracking FAILED - Campaign: $campaign_id, RID: $id not found");
         return 'empty';
+    }
 }
 ?>

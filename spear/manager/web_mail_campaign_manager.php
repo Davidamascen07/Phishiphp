@@ -99,9 +99,12 @@ function getCampaignListWebMail($conn){
 		$campaign['mailcamp_list'] = ['error' => 'No data'];
 
 	$resp = [];
-	$result = mysqli_query($conn, "SELECT tracker_id,tracker_name,tracker_step_data,date,start_time,stop_time,active FROM tb_core_web_tracker_list");
-	if(mysqli_num_rows($result) > 0){
-		foreach (mysqli_fetch_all($result, MYSQLI_ASSOC) as $row){
+	$stmt = $conn->prepare("SELECT tracker_id,tracker_name,tracker_step_data,date,start_time,stop_time,active FROM tb_core_web_tracker_list WHERE client_id = ?");
+	$stmt->bind_param('s', $current_client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result && $result->num_rows > 0){
+		foreach ($result->fetch_all(MYSQLI_ASSOC) as $row){
 			$row["tracker_step_data"] = json_decode($row["tracker_step_data"]);	
 			$row['date'] = getInClientTime_FD($DTime_info,$row['date'],null,'d-m-Y h:i A');
 			$row['start_time'] = getInClientTime_FD($DTime_info,$row['start_time'],null,'d-m-Y h:i A');

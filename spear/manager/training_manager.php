@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__) . '/manager/session_manager.php');
+require_once(dirname(__FILE__) . '/session_manager.php');
 if(isSessionValid() == false)
     die("Access denied");
 
@@ -16,6 +16,7 @@ function createTrainingTables($conn) {
         `module_type` varchar(50) NOT NULL,
         `content_data` longtext DEFAULT NULL,
         `quiz_data` longtext DEFAULT NULL,
+        `quiz_enabled` tinyint(1) DEFAULT 0,
         `passing_score` int(11) DEFAULT 70,
         `estimated_duration` int(11) DEFAULT 15,
         `difficulty_level` varchar(20) DEFAULT 'basic',
@@ -378,6 +379,7 @@ if ($_POST) {
             echo json_encode(['result' => 'success', 'data' => $rankings]);
             break;
 
+        case 'get_stats':
         case 'get_training_stats':
             $client_id = $_POST['client_id'] ?? '';
             
@@ -788,5 +790,393 @@ function issueCertificate($conn, $progress_id, $user_email, $module_id, $score) 
 
 function generateRandomId($length = 10) {
     return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+}
+
+/**
+ * TrainingManager Class
+ * Main class for training module management operations
+ */
+class TrainingManager {
+    private $db;
+    
+    public function __construct() {
+        global $conn;
+        $this->db = $conn;
+    }
+    
+    public function __destruct() {
+        if ($this->db) {
+            $this->db->close();
+        }
+    }
+
+    /**
+     * Get all training modules
+     */
+    public function getAllTrainingModules($client_id = null) {
+        try {
+            $sql = "SELECT * FROM tb_training_modules WHERE status = 1";
+            $params = array();
+            
+            if ($client_id) {
+                $sql .= " AND (client_id = ? OR client_id IS NULL)";
+                $params[] = $client_id;
+            }
+            
+            $sql .= " ORDER BY created_date DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            if (!empty($params)) {
+                $types = str_repeat('s', count($params));
+                $stmt->bind_param($types, ...$params);
+            }
+            
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $modules = array();
+            while ($row = $result->fetch_assoc()) {
+                $modules[] = $row;
+            }
+            
+            return $modules;
+            
+        } catch (Exception $e) {
+            error_log("Error getting training modules: " . $e->getMessage());
+            return array();
+        }
+    }
+
+    /**
+     * Get training module by ID
+     */
+    public function getTrainingModuleById($module_id) {
+        try {
+            $sql = "SELECT *, 
+                    CASE 
+                        WHEN module_type IN ('quiz', 'mixed') OR quiz_data IS NOT NULL THEN 1 
+                        ELSE 0 
+                    END AS quiz_enabled
+                    FROM tb_training_modules WHERE module_id = ? AND status = 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param("s", $module_id);
+            $stmt->execute();
+            
+            $result = $stmt->get_result();
+            return $result->fetch_assoc();
+            
+        } catch (Exception $e) {
+            error_log("Error getting training module: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Create new training module
+     */
+    public function createTrainingModule($data) {
+        try {
+            $module_id = 'TM_' . uniqid();
+            
+            $sql = "INSERT INTO tb_training_modules 
+                    (module_id, module_name, module_description, module_type, content_data, 
+                     quiz_data, passing_score, estimated_duration, difficulty_level, 
+                     category, tags, created_by, created_date) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $this->db->prepare($sql);
+            $created_date = date('Y-m-d H:i:s');
+            
+            $stmt->bind_param("ssssssiisssss", 
+                $module_id,
+                $data['module_name'],
+                $data['module_description'],
+                $data['module_type'],
+                $data['content_data'],
+                $data['quiz_data'],
+                $data['passing_score'],
+                $data['estimated_duration'],
+                $data['difficulty_level'],
+                $data['category'],
+                $data['tags'],
+                $data['created_by'],
+                $created_date
+            );
+            
+            if ($stmt->execute()) {
+                return array('success' => true, 'module_id' => $module_id);
+            } else {
+                return array('success' => false, 'error' => 'Failed to create module');
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error creating training module: " . $e->getMessage());
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    /**
+     * Update training module
+     */
+    public function updateTrainingModule($module_id, $data) {
+        try {
+            $sql = "UPDATE tb_training_modules SET 
+                    module_name = ?, module_description = ?, module_type = ?, 
+                    content_data = ?, quiz_data = ?, passing_score = ?, 
+                    estimated_duration = ?, difficulty_level = ?, category = ?, 
+                    tags = ?, modified_date = ? 
+                    WHERE module_id = ?";
+            
+            $stmt = $this->db->prepare($sql);
+            $modified_date = date('Y-m-d H:i:s');
+            
+            $stmt->bind_param("sssssiisssss", 
+                $data['module_name'],
+                $data['module_description'],
+                $data['module_type'],
+                $data['content_data'],
+                $data['quiz_data'],
+                $data['passing_score'],
+                $data['estimated_duration'],
+                $data['difficulty_level'],
+                $data['category'],
+                $data['tags'],
+                $modified_date,
+                $module_id
+            );
+            
+            return $stmt->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error updating training module: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Delete training module
+     */
+    public function deleteTrainingModule($module_id) {
+        try {
+            // Soft delete
+            $sql = "UPDATE tb_training_modules SET status = 0 WHERE module_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param("s", $module_id);
+            
+            return $stmt->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error deleting training module: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get training statistics
+     */
+    public function getTrainingStatistics($client_id = null) {
+        try {
+            $stats = array();
+            
+            // Total modules
+            $sql = "SELECT COUNT(*) as total FROM tb_training_modules WHERE status = 1";
+            if ($client_id) {
+                $sql .= " AND (client_id = '$client_id' OR client_id IS NULL)";
+            }
+            $result = $this->db->query($sql);
+            $stats['total_modules'] = $result->fetch_assoc()['total'];
+            
+            // Active assignments
+            $sql = "SELECT COUNT(*) as total FROM tb_training_assignments WHERE status = 1";
+            if ($client_id) {
+                $sql .= " AND client_id = '$client_id'";
+            }
+            $result = $this->db->query($sql);
+            $stats['active_assignments'] = $result->fetch_assoc()['total'];
+            
+            // Completed trainings
+            $sql = "SELECT COUNT(*) as total FROM tb_training_progress WHERE status = 'completed'";
+            if ($client_id) {
+                $sql .= " AND client_id = '$client_id'";
+            }
+            $result = $this->db->query($sql);
+            $stats['completed_trainings'] = $result->fetch_assoc()['total'];
+            
+            // Certificates issued
+            $sql = "SELECT COUNT(*) as total FROM tb_training_certificates WHERE 1=1";
+            if ($client_id) {
+                $sql .= " AND client_id = '$client_id'";
+            }
+            $result = $this->db->query($sql);
+            $stats['certificates_issued'] = $result->fetch_assoc()['total'];
+            
+            return $stats;
+            
+        } catch (Exception $e) {
+            error_log("Error getting training statistics: " . $e->getMessage());
+            return array(
+                'total_modules' => 0,
+                'active_assignments' => 0,
+                'completed_trainings' => 0,
+                'certificates_issued' => 0
+            );
+        }
+    }
+
+    /**
+     * Get training rankings
+     */
+    public function getTrainingRankings($limit = 10, $client_id = null) {
+        try {
+            $sql = "SELECT 
+                        tp.user_email,
+                        COUNT(*) as completed_trainings,
+                        SUM(tm.points_value) as total_points,
+                        AVG(tqr.score) as avg_score
+                    FROM tb_training_progress tp
+                    JOIN tb_training_modules tm ON tp.module_id = tm.module_id
+                    LEFT JOIN tb_training_quiz_results tqr ON tp.user_id = tqr.user_id AND tp.module_id = tqr.module_id
+                    WHERE tp.status = 'completed'";
+            
+            if ($client_id) {
+                $sql .= " AND tp.client_id = ?";
+            }
+            
+            $sql .= " GROUP BY tp.user_email
+                     ORDER BY total_points DESC, avg_score DESC
+                     LIMIT ?";
+            
+            $stmt = $this->db->prepare($sql);
+            
+            if ($client_id) {
+                $stmt->bind_param("si", $client_id, $limit);
+            } else {
+                $stmt->bind_param("i", $limit);
+            }
+            
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $rankings = array();
+            $position = 1;
+            while ($row = $result->fetch_assoc()) {
+                $row['position'] = $position++;
+                $rankings[] = $row;
+            }
+            
+            return $rankings;
+            
+        } catch (Exception $e) {
+            error_log("Error getting training rankings: " . $e->getMessage());
+            return array();
+        }
+    }
+
+    /**
+     * Assign training to users
+     */
+    public function assignTraining($module_id, $client_id, $user_emails, $start_date = null, $end_date = null) {
+        try {
+            $assignment_id = 'TA_' . uniqid();
+            
+            $sql = "INSERT INTO tb_training_assignments 
+                    (assignment_id, module_id, client_id, assigned_users, assignment_type, 
+                     start_date, end_date, created_date) 
+                    VALUES (?, ?, ?, ?, 'manual', ?, ?, ?)";
+            
+            $stmt = $this->db->prepare($sql);
+            $created_date = date('Y-m-d H:i:s');
+            $assigned_users = is_array($user_emails) ? implode(',', $user_emails) : $user_emails;
+            
+            $stmt->bind_param("sssssss", 
+                $assignment_id,
+                $module_id,
+                $client_id,
+                $assigned_users,
+                $start_date,
+                $end_date,
+                $created_date
+            );
+            
+            if ($stmt->execute()) {
+                // Create individual progress records
+                $this->createProgressRecords($assignment_id, $user_emails);
+                return array('success' => true, 'assignment_id' => $assignment_id);
+            } else {
+                return array('success' => false, 'error' => 'Failed to assign training');
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error assigning training: " . $e->getMessage());
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    /**
+     * Create individual progress records for assigned users
+     */
+    private function createProgressRecords($assignment_id, $user_emails) {
+        try {
+            $emails = is_array($user_emails) ? $user_emails : explode(',', $user_emails);
+            
+            foreach ($emails as $email) {
+                $progress_id = 'TP_' . uniqid();
+                
+                $sql = "INSERT INTO tb_training_progress 
+                        (progress_id, assignment_id, user_email, status, created_date) 
+                        VALUES (?, ?, ?, 'assigned', ?)";
+                
+                $stmt = $this->db->prepare($sql);
+                $created_date = date('Y-m-d H:i:s');
+                
+                $stmt->bind_param("ssss", $progress_id, $assignment_id, trim($email), $created_date);
+                $stmt->execute();
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error creating progress records: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get user training progress
+     */
+    public function getUserProgress($user_email, $client_id = null) {
+        try {
+            $sql = "SELECT tp.*, tm.module_name, tm.estimated_duration, ta.end_date
+                    FROM tb_training_progress tp
+                    JOIN tb_training_assignments ta ON tp.assignment_id = ta.assignment_id
+                    JOIN tb_training_modules tm ON ta.module_id = tm.module_id
+                    WHERE tp.user_email = ?";
+            
+            if ($client_id) {
+                $sql .= " AND ta.client_id = ?";
+            }
+            
+            $sql .= " ORDER BY tp.created_date DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            
+            if ($client_id) {
+                $stmt->bind_param("ss", $user_email, $client_id);
+            } else {
+                $stmt->bind_param("s", $user_email);
+            }
+            
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $progress = array();
+            while ($row = $result->fetch_assoc()) {
+                $progress[] = $row;
+            }
+            
+            return $progress;
+            
+        } catch (Exception $e) {
+            error_log("Error getting user progress: " . $e->getMessage());
+            return array();
+        }
+    }
 }
 ?>

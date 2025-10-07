@@ -21,7 +21,7 @@
     </div>
     
     <div id="main-wrapper">
-        <?php include_once '/z_menu.php' ?>
+        <?php include_once 'z_menu.php' ?>
         
         <div class="page-wrapper">
             <div class="page-breadcrumb">
@@ -69,17 +69,6 @@
 
     .note-editor .note-editable p { color: #fff; }
     </style>
-    <div id="main-wrapper">
-        <?php include_once 'z_menu.php' ?>
-        <div class="page-wrapper">
-            <div class="page-breadcrumb">
-                <div class="row">
-                    <div class="col-12 d-flex no-block align-items-center">
-                        <h4 class="page-title">Banco de Perguntas</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="modern-card">

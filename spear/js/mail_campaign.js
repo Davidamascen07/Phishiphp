@@ -2,15 +2,36 @@ var globalModalValue = '';
 var dt_mail_campaign_list;
 
 $(function() {
+    // User groups - no search (client-specific, limited options)
     $("#userGroupSelector").select2({
         minimumResultsForSearch: -1
     });
+    
+    // Mail templates - with search and custom formatting (shared between clients, many options)
     $("#mailTemplateSelector").select2({
-        minimumResultsForSearch: -1
+        placeholder: "Pesquisar template...",
+        allowClear: true,
+        minimumResultsForSearch: 0,
+        templateResult: function(data) {
+            if (!data.id) return data.text;
+            var clientInfo = $(data.element).data('client') ? ' [Cliente: ' + $(data.element).data('client') + ']' : '';
+            return $('<span>' + data.text + '<small style="color: #666;">' + clientInfo + '</small></span>');
+        }
     });
+    
+    // Mail senders - with search and custom formatting (shared between clients, many options)
     $("#mailSenderSelector").select2({
-        minimumResultsForSearch: -1
+        placeholder: "Pesquisar remetente...",
+        allowClear: true,
+        minimumResultsForSearch: 0,
+        templateResult: function(data) {
+            if (!data.id) return data.text;
+            var clientInfo = $(data.element).data('client') ? ' [Cliente: ' + $(data.element).data('client') + ']' : '';
+            return $('<span>' + data.text + '<small style="color: #666;">' + clientInfo + '</small></span>');
+        }
     });
+    
+    // Mail config - no search (global settings, limited options)
     $("#mailConfigSelector").select2({
         minimumResultsForSearch: -1
     });
@@ -36,16 +57,27 @@ function pullMailCampaignFieldData() {
          })
     }).done(function (data) {
         if(!data['error']){  // no data error
+            // Populate user groups (client-specific)
             $.each(data.user_group, function() {
                 $('#userGroupSelector').append('<option value="' + this.user_group_id + '">' + this.user_group_name + '</option>');
             });
 
+            // Populate mail templates (shared - with enhanced display for search)
             $.each(data.mail_template, function() {
-                $('#mailTemplateSelector').append('<option value="' + this.mail_template_id + '">' + this.mail_template_name + '</option>');
+                var displayText = this.mail_template_name;
+                if (this.mail_template_subject) {
+                    displayText += ' (' + this.mail_template_subject + ')';
+                }
+                $('#mailTemplateSelector').append('<option value="' + this.mail_template_id + '" data-client="' + this.client_id + '">' + displayText + '</option>');
             });
 
+            // Populate mail senders (shared - with enhanced display for search)
             $.each(data.mail_sender, function() {
-                $('#mailSenderSelector').append('<option value="' + this.sender_list_id + '">' + this.sender_name + '</option>');
+                var displayText = this.sender_name;
+                if (this.sender_from) {
+                    displayText += ' (' + this.sender_from + ')';
+                }
+                $('#mailSenderSelector').append('<option value="' + this.sender_list_id + '" data-client="' + this.client_id + '">' + displayText + '</option>');
             });
 
             $.each(data.mail_config, function() {

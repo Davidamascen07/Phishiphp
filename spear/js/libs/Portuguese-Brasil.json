@@ -1,0 +1,194 @@
+{
+    "sEmptyTable": "Nenhum dado disponível na tabela",
+    "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+    "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+    "sInfoFiltered": "(filtrado de _MAX_ registros no total)",
+    "sInfoPostFix": "",
+    "sInfoThousands": ".",
+    "sLengthMenu": "Mostrar _MENU_ registros por página",
+    "sLoadingRecords": "Carregando...",
+    "sProcessing": "Processando...",
+    "sZeroRecords": "Nenhum registro encontrado",
+    "sSearch": "Pesquisar:",
+    "oPaginate": {
+        "sNext": "Próximo",
+        "sPrevious": "Anterior",
+        "sFirst": "Primeiro",
+        "sLast": "Último"
+    },
+    "oAria": {
+        "sSortAscending": ": ative para classificar a coluna em ordem crescente",
+        "sSortDescending": ": ative para classificar a coluna em ordem decrescente"
+    },
+    "select": {
+        "rows": {
+            "_": "%d linhas selecionadas",
+            "0": "Nenhuma linha selecionada",
+            "1": "1 linha selecionada"
+        }
+    },
+    "buttons": {
+        "copy": "Copiar",
+        "copyTitle": "Copiar para a área de transferência",
+        "copySuccess": {
+            "_": "%d linhas copiadas",
+            "1": "1 linha copiada"
+        },
+        "print": "Imprimir",
+        "excel": "Excel",
+        "csv": "CSV",
+        "pdf": "PDF",
+        "colvis": "Visibilidade das colunas",
+        "collection": "Coleção",
+        "upload": "Selecionar arquivo...",
+        "pageLength": {
+            "-1": "Mostrar todas as linhas",
+            "_": "Mostrar %d linhas"
+        }
+    },
+    "autoFill": {
+        "cancel": "Cancelar",
+        "fill": "Preencher todas as células com <i>%d</i>",
+        "fillHorizontal": "Preencher células horizontalmente",
+        "fillVertical": "Preencher células verticalmente"
+    },
+    "searchBuilder": {
+        "add": "Adicionar condição",
+        "button": {
+            "0": "Construtor de pesquisa",
+            "_": "Construtor de pesquisa (%d)"
+        },
+        "clearAll": "Limpar tudo",
+        "condition": "Condição",
+        "data": "Dados",
+        "deleteTitle": "Excluir regra de filtro",
+        "leftTitle": "Critérios de recuo",
+        "logicAnd": "E",
+        "logicOr": "Ou",
+        "rightTitle": "Critérios de dedução",
+        "title": {
+            "0": "Construtor de pesquisa",
+            "_": "Construtor de pesquisa (%d)"
+        },
+        "value": "Valor",
+        "conditions": {
+            "date": {
+                "after": "Depois",
+                "before": "Antes",
+                "between": "Entre",
+                "empty": "Vazio",
+                "equals": "Igual a",
+                "not": "Não",
+                "notBetween": "Não está entre",
+                "notEmpty": "Não vazio"
+            },
+            "number": {
+                "between": "Entre",
+                "empty": "Vazio",
+                "equals": "Igual a",
+                "gt": "Maior que",
+                "gte": "Maior ou igual a",
+                "lt": "Menor que",
+                "lte": "Menor ou igual a",
+                "not": "Não",
+                "notBetween": "Não está entre",
+                "notEmpty": "Não vazio"
+            },
+            "string": {
+                "contains": "Contém",
+                "empty": "Vazio",
+                "endsWith": "Termina com",
+                "equals": "Igual a",
+                "not": "Não",
+                "notEmpty": "Não vazio",
+                "startsWith": "Começa com"
+            },
+            "array": {
+                "equals": "Igual a",
+                "empty": "Vazio",
+                "contains": "Contém",
+                "not": "Não",
+                "notEmpty": "Não vazio",
+                "without": "Sem"
+            }
+        }
+    },
+    "searchPanes": {
+        "clearMessage": "Limpar tudo",
+        "collapse": {
+            "0": "Painéis de pesquisa",
+            "_": "Painéis de pesquisa (%d)"
+        },
+        "count": "{total}",
+        "countFiltered": "{shown} ({total})",
+        "emptyPanes": "Nenhum painel de pesquisa",
+        "loadMessage": "Carregando painéis de pesquisa",
+        "title": "Filtros ativos - %d"
+    },
+    "datetime": {
+        "previous": "Anterior",
+        "next": "Próximo",
+        "hours": "Horas",
+        "minutes": "Minutos",
+        "seconds": "Segundos",
+        "unknown": "-",
+        "amPm": [
+            "AM",
+            "PM"
+        ],
+        "months": [
+            "Janeiro",
+            "Fevereiro",
+            "Março",
+            "Abril",
+            "Maio",
+            "Junho",
+            "Julho",
+            "Agosto",
+            "Setembro",
+            "Outubro",
+            "Novembro",
+            "Dezembro"
+        ],
+        "weekdays": [
+            "Domingo",
+            "Segunda-feira",
+            "Terça-feira",
+            "Quarta-feira",
+            "Quinta-feira",
+            "Sexta-feira",
+            "Sábado"
+        ]
+    },
+    "editor": {
+        "close": "Fechar",
+        "create": {
+            "button": "Novo",
+            "title": "Criar nova entrada",
+            "submit": "Criar"
+        },
+        "edit": {
+            "button": "Editar",
+            "title": "Editar entrada",
+            "submit": "Atualizar"
+        },
+        "remove": {
+            "button": "Remover",
+            "title": "Remover",
+            "submit": "Remover",
+            "confirm": {
+                "_": "Tem certeza de que deseja excluir %d linhas?",
+                "1": "Tem certeza de que deseja excluir 1 linha?"
+            }
+        },
+        "error": {
+            "system": "Ocorreu um erro no sistema (<a target=\"\\\" rel=\"\\ nofollow\" href=\"\\\">Mais informações</a>)."
+        },
+        "multi": {
+            "title": "Múltiplos valores",
+            "info": "Os itens selecionados contêm valores diferentes para esta entrada. Para editar e definir todos os itens desta entrada com o mesmo valor, clique ou toque aqui, caso contrário, eles manterão seus valores individuais.",
+            "restore": "Desfazer alterações",
+            "noMulti": "Esta entrada pode ser editada individualmente, mas não como parte de um grupo."
+        }
+    }
+}

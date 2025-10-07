@@ -10,7 +10,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="LooPhish - Training Rankings">
       <meta name="author" content="">
-      <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
       <title>LooPhish - Rankings de Treinamento</title>
       
       <!-- Custom CSS -->
@@ -28,7 +28,7 @@
       </div>
       
       <div id="main-wrapper">
-         <?php include_once '/z_menu.php' ?>
+         <?php include_once 'z_menu.php' ?>
          
          <div class="page-wrapper">
             <div class="page-breadcrumb">
@@ -248,18 +248,18 @@
       </div>
 
       <!-- JavaScript -->
-   <script src="js/libs/jquery/jquery-3.6.0.minjs"></script>
-   <script src="js/libs/jquery/jquery-ui.minjs"></script>
-   <script src="js/libsjs.cookie.minjs"></script>
-   <script src="js/libs/popper.minjs"></script>
-   <script src="js/libs/bootstrap.minjs"></script>
-   <script src="js/libs/perfect-scrollbar.jquery.minjs"></script>
-   <script src="js/libs/custom.minjs"></script>
-   <script src="js/libs/jquery/datatablesjs"></script>
-   <script src="js/libs/jquery/dataTables.buttons.minjs"></script>
-   <script src="js/libs/toastr.minjs"></script>
-   <script src="js/common_scriptsjs"></script>
-   <script src="js/training_rankingsjs"></script>
-   <script defer src="js/libs/sidebarmenujs"></script>
+   <script src="js/libs/jquery/jquery-3.6.0.min.js"></script>
+   <script src="js/libs/jquery/jquery-ui.min.js"></script>
+   <script src="js/libs/js.cookie.min.js"></script>
+   <script src="js/libs/popper.min.js"></script>
+   <script src="js/libs/bootstrap.min.js"></script>
+   <script src="js/libs/perfect-scrollbar.jquery.min.js"></script>
+   <script src="js/libs/custom.min.js"></script>
+   <script src="js/libs/jquery/datatables.js"></script>
+   <script src="js/libs/jquery/dataTables.buttons.min.js"></script>
+   <script src="js/libs/toastr.min.js"></script>
+   <script src="js/common_scripts.js"></script>
+   <script src="js/training_rankings.js"></script>
+   <script defer src="js/libs/sidebarmenu.js"></script>
    </body>
 </html>

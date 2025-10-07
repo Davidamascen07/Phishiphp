@@ -70,6 +70,11 @@ function saveWebTracker($conn, &$POSTJ) {
 	}
 
 	if ($stmt->execute() === TRUE){
+		// Save training configuration if enabled
+		if (isset($tracker_step_data['training']) && $tracker_step_data['training']['training_enabled']) {
+			saveTrainingConfiguration($conn, $tracker_id, $tracker_step_data['training']);
+		}
+		
 		echo json_encode(['result' => 'success']);	
 		pauseStopWebTrackerTracking($conn,$active,$tracker_id,true);
 	}
@@ -248,8 +253,91 @@ function getLinktoWebTracker($conn){
 		}
 		echo json_encode($resp);
 	}
-	else
-		echo json_encode(['error' => 'No data']);
-	$stmt->close();
+}
+
+/**
+ * Save training configuration for a tracker
+ */
+function saveTrainingConfiguration($conn, $tracker_id, $training_config) {
+    try {
+        // Get campaign ID from tracker (we'll need to link to campaigns)
+        $stmt = $conn->prepare("SELECT campaign_id FROM tb_core_web_tracker_list WHERE tracker_id = ?");
+        $stmt->bind_param('s', $tracker_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $campaign_id = $row['campaign_id'] ?? null;
+            
+            // If no campaign_id exists, we'll create a virtual campaign record for tracking
+            if (!$campaign_id) {
+                $campaign_id = createVirtualCampaignForTracker($conn, $tracker_id);
+            }
+            
+            if ($campaign_id) {
+                // Delete existing training assignments for this campaign
+                $stmt = $conn->prepare("DELETE FROM tb_campaign_training_assignments WHERE campaign_id = ?");
+                $stmt->bind_param('i', $campaign_id);
+                $stmt->execute();
+                
+                // Insert new training assignment
+                $stmt = $conn->prepare("
+                    INSERT INTO tb_campaign_training_assignments 
+                    (campaign_id, module_id, trigger_type, redirect_url, is_active, created_at) 
+                    VALUES (?, ?, ?, ?, 1, NOW())
+                ");
+                
+                $stmt->bind_param('iiss', 
+                    $campaign_id,
+                    $training_config['training_module_id'],
+                    $training_config['training_trigger_condition'],
+                    $training_config['training_completion_redirect']
+                );
+                
+                $stmt->execute();
+                
+                // Update tracker with campaign_id if it was created
+                if ($row['campaign_id'] === null) {
+                    $stmt = $conn->prepare("UPDATE tb_core_web_tracker_list SET campaign_id = ? WHERE tracker_id = ?");
+                    $stmt->bind_param('is', $campaign_id, $tracker_id);
+                    $stmt->execute();
+                }
+            }
+        }
+        
+        $stmt->close();
+        
+    } catch (Exception $e) {
+        error_log("Error saving training configuration: " . $e->getMessage());
+    }
+}
+
+/**
+ * Create a virtual campaign for tracker-only training
+ */
+function createVirtualCampaignForTracker($conn, $tracker_id) {
+    try {
+        $campaign_name = "Auto Campaign for Tracker: " . $tracker_id;
+        $client_id = getCurrentClientId();
+        
+        $stmt = $conn->prepare("
+            INSERT INTO tb_campaigns 
+            (campaign_name, client_id, created_at, is_virtual) 
+            VALUES (?, ?, NOW(), 1)
+        ");
+        
+        $stmt->bind_param('ss', $campaign_name, $client_id);
+        
+        if ($stmt->execute()) {
+            return $conn->insert_id;
+        }
+        
+        return null;
+        
+    } catch (Exception $e) {
+        error_log("Error creating virtual campaign: " . $e->getMessage());
+        return null;
+    }
 }
 ?>

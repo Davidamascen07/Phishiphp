@@ -693,7 +693,8 @@
 
          function manageUsers(clientId) {
             // Redirecionar para página de gerenciamento de usuários
-            window.location.href = `ClientUsers?client_id=${clientId}`;
+            console.log('Redirecionando para UserManagement com client_id:', clientId);
+            window.location.href = `UserManagement?client_id=${clientId}`;
          }
 
          function filterClients() {

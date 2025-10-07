@@ -184,21 +184,30 @@ function makeCopyMailCampaignList($conn, $old_campaign_id, $new_campaign_id, $ne
 
 function pullMailCampaignFieldData($conn){
 	$resp = [];
-	$result = mysqli_query($conn, "SELECT user_group_id,user_group_name FROM tb_core_mailcamp_user_group");
-	if(mysqli_num_rows($result) > 0){
-		$resp['user_group'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
+	$current_client_id = getCurrentClientId();
+	
+	// Filter user groups by current client
+	$stmt = $conn->prepare("SELECT user_group_id,user_group_name FROM tb_core_mailcamp_user_group WHERE client_id = ?");
+	$stmt->bind_param('s', $current_client_id);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	if($result && $result->num_rows > 0){
+		$resp['user_group'] = $result->fetch_all(MYSQLI_ASSOC);
 	}
 
-	$result = mysqli_query($conn, "SELECT mail_template_id,mail_template_name FROM tb_core_mailcamp_template_list");
+	// Load all mail templates (shared between clients for reuse) with additional info for search
+	$result = mysqli_query($conn, "SELECT mail_template_id, mail_template_name, mail_template_subject, client_id FROM tb_core_mailcamp_template_list ORDER BY mail_template_name");
 	if(mysqli_num_rows($result) > 0){
 		$resp['mail_template'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
 	}
 
-	$result = mysqli_query($conn, "SELECT sender_list_id,sender_name FROM tb_core_mailcamp_sender_list");
+	// Load all mail senders (shared between clients for reuse) with additional info for search  
+	$result = mysqli_query($conn, "SELECT sender_list_id, sender_name, sender_from, client_id FROM tb_core_mailcamp_sender_list ORDER BY sender_name");
 	if(mysqli_num_rows($result) > 0){
 		$resp['mail_sender'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
 	}
 
+	// Mail config is shared globally (no client filter needed)
 	$result = mysqli_query($conn, "SELECT mconfig_id,mconfig_name FROM tb_core_mailcamp_config");
 	if(mysqli_num_rows($result) > 0){
 		$resp['mail_config'] = mysqli_fetch_all($result, MYSQLI_ASSOC);

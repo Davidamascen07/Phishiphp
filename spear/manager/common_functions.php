@@ -355,7 +355,9 @@ function getTimelineDataMail($conn, $campaign_id, $DTime_info){
     foreach($rows as $i => $row){
         $timestamp_conv[$row['send_time']] = getInClientTime($DTime_info,$row['send_time']);
         $row['mail_open_times'] = json_decode($row['mail_open_times']);
-        if($row['mail_open_times']){
+        
+        // Corrigir contagem: verificar se mail_open_times não está vazio
+        if($row['mail_open_times'] && count($row['mail_open_times']) > 0){
             $mail_open_count++;
             foreach($row['mail_open_times'] as $timestamp)
                 $timestamp_conv[$timestamp] = getInClientTime($DTime_info,$timestamp);

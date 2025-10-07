@@ -8,7 +8,7 @@ $(document).ready(function() {
         serverSide: false,
         responsive: true,
         language: {
-            url: '../js/libs/Portuguese-Brasil.json'
+            url: 'js/libs/Portuguese-Brasil.json'
         },
         columnDefs: [
             { targets: -1, orderable: false } // Disable ordering on actions column
@@ -69,8 +69,62 @@ $(document).ready(function() {
     });
 });
 
+    // Initialize Summernote for content editor
+    $('#content_data').summernote({
+        height: 300,
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'clear']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video']],
+            ['view', ['fullscreen', 'codeview', 'help']]
+        ]
+    });
+
+    // Module type change handler
+    $('#module_type').change(function() {
+        var selectedType = $(this).val();
+        if (selectedType === 'quiz' || selectedType === 'mixed') {
+            $('#quiz_section').show();
+        } else {
+            $('#quiz_section').hide();
+        }
+    });
+
+    // Toggle bank config when question source changes
+    $(document).on('change', 'input[name="question_source"]', function(){
+        var v = $(this).val();
+        if (v === 'bank') $('#bank_config').show(); else $('#bank_config').hide();
+    });
+
+    // Load initial data
+    loadModules();
+    loadTrainingStats();
+    loadClients();
+    loadRankings();
+
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        loadTrainingStats();
+        loadRankings();
+    }, 30000);
+
+    // Form handlers
+    $('#addModuleForm').on('submit', function(e) {
+        e.preventDefault();
+        saveModule();
+    });
+
+    $('#quickAssignForm').on('submit', function(e) {
+        e.preventDefault();
+        quickAssignTraining();
+    });
+
+
 function loadModules() {
-    $.post('../manager/training_manager.php', {
+    $.post('manager/training_manager.php', {
         action_type: 'get_modules'
     }, function(response) {
         if (response.result === 'success') {
@@ -142,7 +196,7 @@ function populateModuleSelect(modules) {
 }
 
 function loadClients() {
-    $.post('../manager/client_manager.php', {
+    $.post('manager/client_manager.php', {
         action_type: 'get_clients'
     }, function(response) {
         if (response.result === 'success') {
@@ -160,7 +214,7 @@ function loadClients() {
 }
 
 function loadTrainingStats() {
-    $.post('../manager/training_manager.php', {
+    $.post('manager/training_manager.php', {
         action_type: 'get_training_stats'
     }, function(response) {
         if (response.result === 'success') {
@@ -177,7 +231,7 @@ function loadTrainingStats() {
 }
 
 function loadRankings() {
-    $.post('../manager/training_manager.php', {
+    $.post('manager/training_manager.php', {
         action_type: 'get_rankings'
     }, function(response) {
         if (response.result === 'success') {
@@ -251,7 +305,7 @@ function saveModule() {
         tags: $('#tags').val()
     };
 
-    $.post('../manager/training_manager.php', formData, function(response) {
+    $.post('manager/training_manager.php', formData, function(response) {
         if (response.result === 'success') {
             toastr.success('Módulo criado com sucesso!');
             $('#addModuleModal').modal('hide');
@@ -291,7 +345,7 @@ function quickAssignTraining() {
         assignment_type: 'manual'
     };
 
-    $.post('../manager/training_manager.php', formData, function(response) {
+    $.post('manager/training_manager.php', formData, function(response) {
         if (response.result === 'success') {
             toastr.success('Treinamento atribuído com sucesso!');
             $('#quickAssignForm')[0].reset();
@@ -557,7 +611,7 @@ function deleteModule(moduleId) {
 // Initialize training system (run once)
 function initializeTrainingSystem() {
     if (confirm('Isso irá criar as tabelas necessárias para o sistema de treinamentos. Continuar?')) {
-        $.post('../manager/training_manager.php', {
+        $.post('manager/training_manager.php', {
             action_type: 'create_tables'
         }, function(response) {
             if (response.result === 'success') {

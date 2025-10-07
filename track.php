@@ -3,6 +3,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type');
 require_once(dirname(__FILE__) . '/spear/config/db.php');
 require_once(dirname(__FILE__) . '/spear/manager/common_functions.php');
+require_once(dirname(__FILE__) . '/spear/manager/user_campaign_hooks.php');
 require_once(dirname(__FILE__) . '/spear/libs/browser_detect/BrowserDetection.php');
 date_default_timezone_set('UTC');
 //-------------------------------------
@@ -68,10 +69,22 @@ $page = $POSTJ['page'];
 if($page == 0){  //page visit
 	$stmt = $conn->prepare("INSERT INTO tb_data_webpage_visit(tracker_id,session_id,rid,public_ip,ip_info,user_agent,screen_res,time,browser,platform,device_type) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
 	$stmt->bind_param('sssssssssss', $trackerId,$session_id,$rid,$public_ip,$ip_info,$user_agent,$screen_res,$date_time,$user_browser,$user_os,$device_type);
-	if ($stmt->execute() === TRUE)
+	if ($stmt->execute() === TRUE) {
+		// Hook: Registrar visita da página web
+		if (!empty($rid) && filter_var($rid, FILTER_VALIDATE_EMAIL)) {
+			$page_info = [
+				'user_agent' => $user_browser,
+				'platform' => $user_os,
+				'device_type' => $device_type,
+				'ip' => $public_ip,
+				'screen_res' => $screen_res
+			];
+			onWebPageVisited($conn, $rid, $trackerId, $page_info);
+		}
 		die('success'); 
-	else 
+	} else {
 		die("failed"); 
+	}
 }  
 elseif(is_numeric($page)){
     foreach ($POSTJ['form_field_data'] as $i => $field_data) {
@@ -81,10 +94,15 @@ elseif(is_numeric($page)){
 	
 	$stmt = $conn->prepare("INSERT INTO tb_data_webform_submit(tracker_id,session_id,rid,public_ip,ip_info,user_agent,screen_res,time,browser,platform,device_type,page,form_field_data) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
 	$stmt->bind_param('sssssssssssss', $trackerId,$session_id,$rid,$public_ip,$ip_info,$user_agent,$screen_res,$date_time,$user_browser,$user_os,$device_type,$page,$form_field_data);
-	if ($stmt->execute() === TRUE)
+	if ($stmt->execute() === TRUE) {
+		// Hook: Registrar submissão de formulário web
+		if (!empty($rid) && filter_var($rid, FILTER_VALIDATE_EMAIL)) {
+			onWebFormSubmitted($conn, $rid, $trackerId, $POSTJ['form_field_data']);
+		}
 		die('success'); 
-	else 
+	} else {
 		die("failed"); 
+	}
 }
 
 //-----------------------------------------
