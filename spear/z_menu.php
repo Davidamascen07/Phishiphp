@@ -670,6 +670,7 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item" href="/spear/MailUserGroup?action=add&user=new"><i class="mdi mdi-account-group me-2"></i>Grupo de Usuários</a></li>
+                        <li><a class="dropdown-item" href="/spear/CSVImport"><i class="mdi mdi-file-import me-2"></i>Importação CSV</a></li>
                         <li><a class="dropdown-item" href="/spear/MailTemplate?action=add&template=new"><i class="mdi mdi-email-edit me-2"></i>Modelo de Email</a></li>
                         <li><a class="dropdown-item" href="/spear/MailSender?action=add&sender=new"><i class="mdi mdi-account-tie me-2"></i>Lista de Remetentes</a></li>
                     </ul>
@@ -1219,6 +1220,9 @@ $sp_root = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), "\\/");
             </a>
             <a href="/spear/UserManagement" class="submenu-item">
                 <i class="mdi mdi-account-multiple"></i> Gestão de Usuários
+            </a>
+            <a href="/spear/CSVImport" class="submenu-item">
+                <i class="mdi mdi-file-import"></i> Importação CSV
             </a>
         </div>
 

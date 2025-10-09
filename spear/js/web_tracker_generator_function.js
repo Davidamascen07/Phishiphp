@@ -598,25 +598,55 @@ function generateTrackerCode() {
         
         $.each(webpage_data.data[i].form_fields_and_values, function(key, form_field) {
             if(!form_field.track){  
-                code_output_sub += `form_field_data.` + form_field.idname + `="NT";`;
+                // Use bracket notation for IDs with special characters (like hyphens)
+                if (form_field.idname.includes('-') || form_field.idname.includes(' ') || !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(form_field.idname)) {
+                  code_output_sub += `form_field_data['` + form_field.idname + `'] = "NT";`;
+                } else {
+                  code_output_sub += `form_field_data.` + form_field.idname + ` = "NT";`;
+                }
             }
             else{               
                 value = form_field.idname;
 
-                if (key.startsWith("TF_") || key.startsWith("TA_") || key.startsWith("Select_"))
-                  code_output_sub += `form_field_data.` + form_field.idname + ` =document.getElementById('` + form_field.idname + `').value;`;
+                if (key.startsWith("TF_") || key.startsWith("TA_") || key.startsWith("Select_")) {
+                  // Use bracket notation for IDs with special characters (like hyphens)
+                  if (form_field.idname.includes('-') || form_field.idname.includes(' ') || !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(form_field.idname)) {
+                    code_output_sub += `if(document.getElementById('` + form_field.idname + `')) form_field_data['` + form_field.idname + `'] = document.getElementById('` + form_field.idname + `').value;`;
+                  } else {
+                    code_output_sub += `if(document.getElementById('` + form_field.idname + `')) form_field_data.` + form_field.idname + ` = document.getElementById('` + form_field.idname + `').value;`;
+                  }
+                }
                 if (key.startsWith("CB_")) {
-                  code_output_sub += `if (document.getElementById("` + form_field.idname + `").checked) //CheckBox
-                                          form_field_data.` + form_field.idname + ` = true;
-                                      else
-                                          form_field_data.` + form_field.idname + ` = false;`;
-                  
+                  // Use bracket notation for IDs with special characters (like hyphens)
+                  if (form_field.idname.includes('-') || form_field.idname.includes(' ') || !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(form_field.idname)) {
+                    code_output_sub += `if (document.getElementById("` + form_field.idname + `")) { //CheckBox
+                                          if (document.getElementById("` + form_field.idname + `").checked)
+                                              form_field_data['` + form_field.idname + `'] = true;
+                                          else
+                                              form_field_data['` + form_field.idname + `'] = false;
+                                      }`;
+                  } else {
+                    code_output_sub += `if (document.getElementById("` + form_field.idname + `")) { //CheckBox
+                                          if (document.getElementById("` + form_field.idname + `").checked)
+                                              form_field_data.` + form_field.idname + ` = true;
+                                          else
+                                              form_field_data.` + form_field.idname + ` = false;
+                                      }`;
+                  }
                 }
                 if (key.startsWith("RB_")) {
-                  code_output_sub += `if(document.querySelector('input[name="` + form_field.idname + `"]:checked')) //RadioButton
+                  // Use bracket notation for IDs with special characters (like hyphens)
+                  if (form_field.idname.includes('-') || form_field.idname.includes(' ') || !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(form_field.idname)) {
+                    code_output_sub += `if(document.querySelector('input[name="` + form_field.idname + `"]:checked')) //RadioButton
+                                          form_field_data['` + form_field.idname + `'] = document.querySelector('input[name="` + form_field.idname + `"]:checked').value;
+                                      else
+                                          form_field_data['` + form_field.idname + `'] = "";`;
+                  } else {
+                    code_output_sub += `if(document.querySelector('input[name="` + form_field.idname + `"]:checked')) //RadioButton
                                           form_field_data.` + form_field.idname + ` = document.querySelector('input[name="` + form_field.idname + `"]:checked').value;
                                       else
                                           form_field_data.` + form_field.idname + ` = "";`;
+                  }
                 }
             }
         });

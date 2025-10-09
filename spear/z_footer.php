@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="footer-links">
-            <a href="#" class="footer-link">
+            <!-- <a href="#" class="footer-link">
                 <i class="mdi mdi-shield-check"></i>
                 Segurança
             </a>
@@ -21,14 +21,14 @@
             <a href="/spear/SPAbout" class="footer-link">
                 <i class="mdi mdi-information"></i>
                 Sobre
-            </a>
+            </a> -->
         </div>
         <div class="footer-copyright">
             <div class="copyright-text">
-                © 2024 <strong>Loophish</strong>. Todos os direitos reservados.
+                © 2025 <strong>Loophish</strong>. Todos os direitos reservados.
             </div>
             <div class="version-info">
-                Versão 2.0 - Interface Modernizada
+                Versão 2.0
             </div>
         </div>
     </div>

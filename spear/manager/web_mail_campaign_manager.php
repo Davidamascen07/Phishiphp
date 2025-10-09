@@ -48,7 +48,26 @@ if (isset($_POST)) {
 //----------------------------------------------------------------------
 function getWebMailTrackerFromId($conn, $campaign_id, $tracker_id){
 	$DTime_info = getTimeInfo($conn);
-	$current_client_id = getCurrentClientId();
+	
+	// Para modo público, primeiro descobrir o client_id a partir da campanha
+	if(isSessionValid() == false) {
+		$stmt = $conn->prepare("SELECT client_id FROM tb_core_mailcamp_list WHERE campaign_id = ?");
+		$stmt->bind_param("s", $campaign_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		if($result->num_rows > 0) {
+			$client_data = $result->fetch_assoc();
+			$current_client_id = $client_data['client_id'];
+		} else {
+			echo json_encode(['error' => 'Campaign not found'], JSON_INVALID_UTF8_IGNORE);
+			return;
+		}
+	} else {
+		$current_client_id = getCurrentClientId();
+	}
+	
+	$resp = [];
+	
 	$stmt = $conn->prepare("SELECT * FROM tb_core_mailcamp_list WHERE campaign_id = ? AND client_id = ?");
 	$stmt->bind_param("ss", $campaign_id, $current_client_id);
 	$stmt->execute();
@@ -60,20 +79,35 @@ function getWebMailTrackerFromId($conn, $campaign_id, $tracker_id){
 		$row['scheduled_time'] = getInClientTime_FD($DTime_info,$row['scheduled_time']);
 		$row['stop_time'] = getInClientTime_FD($DTime_info,$row['stop_time']);
 		$resp['mailcamp_info'] = $row;
+	} else {
+		echo json_encode(['error' => 'Mail campaign not found'], JSON_INVALID_UTF8_IGNORE);
+		return;
 	}
 
-	$stmt = $conn->prepare("SELECT tracker_name,tracker_step_data,date,start_time,stop_time,active FROM tb_core_web_tracker_list WHERE tracker_id = ?");
+	$stmt = $conn->prepare("SELECT tracker_name,tracker_step_data,date,start_time,stop_time,active,client_id FROM tb_core_web_tracker_list WHERE tracker_id = ?");
 	$stmt->bind_param("s", $tracker_id);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows > 0){
 		$row = $result->fetch_assoc();
+		
+		// Verificar se o tracker pertence ao mesmo cliente
+		if($row['client_id'] !== $current_client_id) {
+			echo json_encode(['error' => 'Tracker and campaign client mismatch'], JSON_INVALID_UTF8_IGNORE);
+			return;
+		}
+		
 		$row['tracker_step_data'] = json_decode($row["tracker_step_data"]);	
 		$row['date'] = getInClientTime_FD($DTime_info,$row['date']);
 		$row['start_time'] = getInClientTime_FD($DTime_info,$row['start_time']);
 		$row['stop_time'] = getInClientTime_FD($DTime_info,$row['stop_time']);
+		unset($row['client_id']); // Remove client_id da resposta
 		$resp['webtracker_info'] = $row;
-	}	
+	} else {
+		echo json_encode(['error' => 'Web tracker not found'], JSON_INVALID_UTF8_IGNORE);
+		return;
+	}
+	
 	echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
 	$stmt->close();	
 }

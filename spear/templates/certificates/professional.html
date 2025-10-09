@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #f4f4f4;
+            color: #333;
+        }
+        
+        .certificate {
+            background: white;
+            border: 2px solid #2c3e50;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            background: #3498db;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .certificate-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .certificate-subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin: 10px 0 30px 0;
+            font-style: italic;
+        }
+        
+        .divider {
+            width: 100px;
+            height: 3px;
+            background: #3498db;
+            margin: 20px auto;
+        }
+        
+        .certification-text {
+            font-size: 1.1rem;
+            margin: 25px 0;
+            color: #34495e;
+        }
+        
+        .recipient-name {
+            font-size: 2.2rem;
+            color: #2980b9;
+            font-weight: bold;
+            margin: 30px 0;
+            text-transform: capitalize;
+            text-decoration: underline;
+            text-decoration-color: #3498db;
+        }
+        
+        .achievement-text {
+            font-size: 1rem;
+            margin: 25px 0;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .details-table {
+            width: 100%;
+            margin: 40px 0;
+            border-collapse: collapse;
+        }
+        
+        .details-table td {
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            font-size: 0.95rem;
+        }
+        
+        .details-table .label {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+            width: 40%;
+        }
+        
+        .details-table .value {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #3498db;
+        }
+        
+        .validation-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: #34495e;
+        }
+        
+        .signatures {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        
+        .signature {
+            text-align: center;
+        }
+        
+        .signature-line {
+            width: 150px;
+            height: 1px;
+            background: #34495e;
+            margin: 0 auto 5px auto;
+        }
+        
+        .corner-decoration {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #3498db;
+        }
+        
+        .corner-decoration.top-left {
+            top: 15px;
+            left: 15px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-decoration.top-right {
+            top: 15px;
+            right: 15px;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-decoration.bottom-left {
+            bottom: 15px;
+            left: 15px;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-decoration.bottom-right {
+            bottom: 15px;
+            right: 15px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        @media print {
+            body { background: white; }
+            .certificate { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="corner-decoration top-left"></div>
+        <div class="corner-decoration top-right"></div>
+        <div class="corner-decoration bottom-left"></div>
+        <div class="corner-decoration bottom-right"></div>
+        
+        <div class="header-logo">🛡️</div>
+        
+        <h1 class="certificate-title">Certificate of Achievement</h1>
+        <p class="certificate-subtitle">Cybersecurity Training Completion</p>
+        
+        <div class="divider"></div>
+        
+        <p class="certification-text">This certifies that</p>
+        
+        <div class="recipient-name">{user_name}</div>
+        
+        <p class="achievement-text">
+            has successfully completed the cybersecurity awareness training program 
+            <strong>"{module_name}"</strong> and has demonstrated proficiency 
+            in identifying and mitigating security threats.
+        </p>
+        
+        <table class="details-table">
+            <tr>
+                <td class="label">Training Module:</td>
+                <td class="value">{module_name}</td>
+            </tr>
+            <tr>
+                <td class="label">Achievement Score:</td>
+                <td class="value">{score_achieved}%</td>
+            </tr>
+            <tr>
+                <td class="label">Completion Date:</td>
+                <td class="value">{completion_date}</td>
+            </tr>
+            <tr>
+                <td class="label">Training Category:</td>
+                <td class="value">{category}</td>
+            </tr>
+        </table>
+        
+        <div class="footer">
+            <div class="signatures">
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <p><strong>Training Director</strong></p>
+                    <p>LoophishX Security Training</p>
+                </div>
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <p><strong>Issued Date</strong></p>
+                    <p>{issued_date}</p>
+                </div>
+            </div>
+            
+            <div class="validation-box">
+                <strong>Certificate Validation</strong><br>
+                Certificate ID: {certificate_id}<br>
+                Validation Code: {validation_code}<br>
+                Verify online at: certificate_view.php?action=validate&cert_id={certificate_id}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

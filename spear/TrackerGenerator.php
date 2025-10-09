@@ -3,7 +3,7 @@ require_once(dirname(__FILE__) . '/manager/session_manager.php');
 isSessionValid(true);
 ?>
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
+<html dir="ltr" lang="pt-BR">
 
 <head>
    <meta charset="utf-8">
@@ -14,7 +14,7 @@ isSessionValid(true);
    <meta name="author" content="">
    <!-- Favicon icon -->
    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
-   <title>SniperPhish - The Web-Email Spear Phishing Toolkit</title>
+   <title>LoopPhish - Gerador de Código de Rastreamento</title>
    <!-- Custom CSS -->
    <link rel="stylesheet" type="text/css" href="css/select2.min.css">
    <link rel="stylesheet" type="text/css" href="css/jquery.steps.css">
@@ -76,7 +76,7 @@ isSessionValid(true);
          <div class="page-breadcrumb">
             <div class="row">
                <div class="col-12 d-flex no-block align-items-center">
-                  <h4 class="page-title">Tracker Code Generator</h4>
+                  <h4 class="page-title">Gerador de Código de Rastreamento</h4>
                </div>
             </div>
          </div>
@@ -92,10 +92,10 @@ isSessionValid(true);
             <!-- ============================================================== -->
             <div class="card">
                <div class="card-body wizard-content">
-                  <h5 class="card-title"><strong>Tracker: </strong><span id="tracker_name">New</span></h4>
+                  <h5 class="card-title"><strong>Rastreador: </strong><span id="tracker_name">Novo</span></h4>
                      <form id="genreator-form" action="#" class="m-t-20">
                         <div>
-                           <h3>Start</h3>
+                           <h3>Início</h3>
                            <section>
                               <div class="col-md-12">
                                  <div class="row mb-3 align-items-left">
@@ -144,18 +144,18 @@ isSessionValid(true);
 
                               <!--<p>(*) Mandatory</p> -->
                            </section>
-                           <h3>Training Integration</h3>
+                           <h3>Integração de Treinamento</h3>
                            <section>
                               <div class="col-md-12">
                                  <div class="row mb-3">
                                     <div class="col-md-12">
-                                       <h6 class="hbar">Training Module Association</h6>
-                                       <p>Associate this phishing campaign with training modules to enhance user awareness.</p>
+                                       <h6 class="hbar">Associação de Módulo de Treinamento</h6>
+                                       <p>Associe esta campanha de phishing com módulos de treinamento para melhorar a consciência do usuário.</p>
                                     </div>
                                  </div>
                                  
                                  <div class="row mb-3">
-                                    <label for="cb_training_enabled" class="col-sm-3 text-left control-label col-form-label">Enable Training Integration</label>
+                                    <label for="cb_training_enabled" class="col-sm-3 text-left control-label col-form-label">Ativar Integração de Treinamento</label>
                                     <div class="custom-control custom-switch col-sm-3 m-t-15 row">
                                        <label class="switch">
                                           <input type="checkbox" id="cb_training_enabled">
@@ -163,52 +163,52 @@ isSessionValid(true);
                                        </label>
                                     </div>
                                     <div class="col-sm-6">
-                                       <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="When enabled, users who interact with this tracker will be redirected to training modules."></i>
+                                       <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Quando ativado, usuários que interagirem com este rastreador serão redirecionados para módulos de treinamento."></i>
                                     </div>
                                  </div>
 
                                  <div id="training_options_area" style="display: none;">
                                     <div class="row mb-3">
-                                       <label for="select_training_module" class="col-sm-3 text-left control-label col-form-label">Training Module</label>
+                                       <label for="select_training_module" class="col-sm-3 text-left control-label col-form-label">Módulo de Treinamento</label>
                                        <div class="col-sm-8">
                                           <select class="select2 form-control custom-select" id="select_training_module" style="height: 36px;width: 100%;">
-                                             <option value="">Select Training Module...</option>
+                                             <option value="">Selecionar Módulo de Treinamento...</option>
                                              <!-- Options will be loaded dynamically -->
                                           </select>
                                        </div>
                                        <div class="col-sm-1">
-                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Select which training module users will be redirected to after interaction."></i>
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Selecione para qual módulo de treinamento os usuários serão redirecionados após a interação."></i>
                                        </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                       <label for="select_training_trigger" class="col-sm-3 text-left control-label col-form-label">Training Trigger</label>
+                                       <label for="select_training_trigger" class="col-sm-3 text-left control-label col-form-label">Gatilho de Treinamento</label>
                                        <div class="col-sm-8">
                                           <select class="form-control custom-select" id="select_training_trigger" style="height: 36px;width: 100%;">
-                                             <option value="immediate">Immediate - Right after click</option>
-                                             <option value="on_completion">On Completion - After completing the phishing flow</option>
-                                             <option value="on_failure">On Failure - After failed phishing attempt</option>
-                                             <option value="on_interaction">On Interaction - After any form interaction</option>
+                                             <option value="immediate">Imediato - Logo após o clique</option>
+                                             <option value="on_completion">Na Conclusão - Após completar o fluxo de phishing</option>
+                                             <option value="on_failure">Na Falha - Após tentativa de phishing falhada</option>
+                                             <option value="on_interaction">Na Interação - Após qualquer interação do formulário</option>
                                           </select>
                                        </div>
                                        <div class="col-sm-1">
-                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Define when the training module should be triggered during the phishing simulation."></i>
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Defina quando o módulo de treinamento deve ser acionado durante a simulação de phishing."></i>
                                        </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                       <label for="tb_training_redirect_url" class="col-sm-3 text-left control-label col-form-label">Custom Redirect URL</label>
+                                       <label for="tb_training_redirect_url" class="col-sm-3 text-left control-label col-form-label">URL de Redirecionamento Personalizada</label>
                                        <div class="col-sm-8">
-                                          <input type="text" class="form-control" id="tb_training_redirect_url" placeholder="https://example.com/training-complete">
+                                          <input type="text" class="form-control" id="tb_training_redirect_url" placeholder="https://exemplo.com/treinamento-completo">
                                        </div>
                                        <div class="col-sm-1">
-                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Optional: URL to redirect after training completion. Leave empty to use default."></i>
+                                          <i class="mdi mdi-information cursor-pointer m-t-5" tabindex="0" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="Opcional: URL para redirecionar após a conclusão do treinamento. Deixe vazio para usar o padrão."></i>
                                        </div>
                                     </div>
                                  </div>
                               </div>
                            </section>
-                           <h3>Web Pages</h3>
+                           <h3>Páginas Web</h3>
                            <section>
                               <div class="col-md-12">
                                  <div id="webpages_area" class="trans">
@@ -225,7 +225,7 @@ isSessionValid(true);
                                  </div>
                               </div>
                            </section>
-                           <h3>Output</h3>
+                           <h3>Resultado</h3>
                            <section>
                               <div class="card">
                                  <!-- Nav tabs -->
@@ -400,35 +400,50 @@ isSessionValid(true);
       // Load available training modules
       function loadTrainingModules() {
          return new Promise(function(resolve, reject) {
+            console.log('Carregando módulos de treinamento...');
+            
             $.post({
-               url: "manager/training_integration_manager",
+               url: "manager/training_integration_manager.php",
                contentType: 'application/json; charset=utf-8',
                data: JSON.stringify({ 
                   action_type: "get_training_modules"
                }),
             }).done(function (response) {
+               console.log('Resposta recebida:', response);
+               
                if(response.result == "success") {
                   var select = $('#select_training_module');
                   select.empty();
-                  select.append('<option value="">Select Training Module...</option>');
+                  select.append('<option value="">Selecionar Módulo de Treinamento...</option>');
                   
-                  $.each(response.modules, function(index, module) {
-                     select.append('<option value="' + module.module_id + '">' + module.module_name + '</option>');
-                  });
+                  if(response.modules && response.modules.length > 0) {
+                     $.each(response.modules, function(index, module) {
+                        select.append('<option value="' + module.module_id + '">' + module.module_name + '</option>');
+                     });
+                     console.log('Módulos carregados:', response.modules.length);
+                  } else {
+                     select.append('<option value="" disabled>Nenhum módulo encontrado</option>');
+                     console.log('Nenhum módulo encontrado na resposta');
+                  }
                   
                   select.trigger('change');
                   resolve();
                } else {
+                  console.error('Erro na resposta:', response.error);
                   reject(response.error);
                }
-            }).fail(function() {
+            }).fail(function(xhr, status, error) {
+               console.error('Falha na requisição:', status, error);
+               console.error('Response Text:', xhr.responseText);
+               
                // Fallback - add some default options if training module loading fails
                var select = $('#select_training_module');
                select.empty();
-               select.append('<option value="">Select Training Module...</option>');
-               select.append('<option value="phishing_awareness">Phishing Awareness Training</option>');
-               select.append('<option value="security_basics">Security Basics</option>');
-               select.append('<option value="email_safety">Email Safety</option>');
+               select.append('<option value="">Selecionar Módulo de Treinamento...</option>');
+               select.append('<option value="fallback_phishing_awareness">Treinamento de Consciência de Phishing</option>');
+               select.append('<option value="fallback_security_basics">Fundamentos de Segurança</option>');
+               select.append('<option value="fallback_email_safety">Segurança de Email</option>');
+               select.append('<option value="" disabled>--- Módulos de fallback (erro no carregamento) ---</option>');
                resolve();
             });
          });

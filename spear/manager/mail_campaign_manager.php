@@ -138,7 +138,24 @@ function getCampaignFromCampaignListId($conn, $campaign_id){
 	$resp['live_mcamp_data']['timestamp_conv'] = $scatter_data_mail_full['timestamp_conv'];
 
 	//-------------------
-	$current_client_id = getCurrentClientId();
+	// Para modo público, primeiro descobrir o client_id a partir da campanha
+	if(isSessionValid() == false) {
+		$stmt = $conn->prepare("SELECT client_id FROM tb_core_mailcamp_list WHERE campaign_id = ?");
+		$stmt->bind_param("s", $campaign_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		if($result->num_rows > 0) {
+			$client_data = $result->fetch_assoc();
+			$current_client_id = $client_data['client_id'];
+		} else {
+			$resp['error'] = 'Campaign not found';
+			echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
+			return;
+		}
+	} else {
+		$current_client_id = getCurrentClientId();
+	}
+	
 	$stmt = $conn->prepare("SELECT campaign_name,campaign_data,date,scheduled_time,camp_status FROM tb_core_mailcamp_list WHERE campaign_id = ? AND client_id = ?");
 	$stmt->bind_param("ss", $campaign_id, $current_client_id);
 	$stmt->execute();
@@ -150,9 +167,10 @@ function getCampaignFromCampaignListId($conn, $campaign_id){
 		$resp['scheduled_time'] = getInClientTime_FD($DTime_info,$row['scheduled_time'],null,'d-m-Y h:i A');
 		$resp['camp_status'] = $row['camp_status'];
 		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
+	} else {
+		$resp['error'] = 'Campaign not found or access denied';
+		echo json_encode($resp, JSON_INVALID_UTF8_IGNORE);
 	}
-	else
-		echo json_encode(['error' => 'No data']);	
 	$stmt->close();
 }
 

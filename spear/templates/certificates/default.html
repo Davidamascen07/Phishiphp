@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .certificate {
+            background: white;
+            border: 8px solid #3498db;
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(52, 152, 219, 0.1) 50%, transparent 70%);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+        
+        .header {
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .certificate-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .certificate-subtitle {
+            font-size: 1.4rem;
+            color: #7f8c8d;
+            margin: 15px 0 0 0;
+            font-style: italic;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .certification-text {
+            font-size: 1.3rem;
+            margin: 30px 0;
+            color: #34495e;
+            line-height: 1.6;
+        }
+        
+        .recipient-name {
+            font-size: 2.8rem;
+            color: #2980b9;
+            font-weight: bold;
+            margin: 40px 0;
+            padding: 25px;
+            border: 4px solid #3498db;
+            border-radius: 15px;
+            display: inline-block;
+            background: rgba(52, 152, 219, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .achievement-text {
+            font-size: 1.2rem;
+            margin: 30px 0;
+            color: #2c3e50;
+            line-height: 1.8;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin: 50px 0;
+        }
+        
+        .detail-box {
+            background: linear-gradient(45deg, #ecf0f1, #bdc3c7);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .detail-value {
+            color: #2980b9;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 3px solid #3498db;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .validation-info {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin: 20px 0;
+        }
+        
+        .signature-line {
+            width: 300px;
+            height: 2px;
+            background: #34495e;
+            margin: 40px auto 10px auto;
+        }
+        
+        .signature-text {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .seal {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(231, 76, 60, 0.1);
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        @media print {
+            body { background: white; }
+            .certificate { border: 8px solid #3498db; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="header">
+            <h1 class="certificate-title">Certificate of Completion</h1>
+            <p class="certificate-subtitle">Cybersecurity Awareness Training Program</p>
+        </div>
+        
+        <div class="content">
+            <p class="certification-text">This is to certify that</p>
+            
+            <div class="recipient-name">{user_name}</div>
+            
+            <p class="achievement-text">
+                has successfully completed the <strong>{module_name}</strong> training module 
+                and demonstrated exceptional proficiency in cybersecurity awareness practices 
+                with a score of <strong>{score_achieved}%</strong>.
+            </p>
+            
+            <div class="details-grid">
+                <div class="detail-box">
+                    <div class="detail-label">Training Module</div>
+                    <div class="detail-value">{module_name}</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Final Score</div>
+                    <div class="detail-value">{score_achieved}%</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Completion Date</div>
+                    <div class="detail-value">{completion_date}</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Time Invested</div>
+                    <div class="detail-value">{time_spent}</div>
+                </div>
+            </div>
+            
+            <p class="achievement-text">
+                This certificate validates the holder's comprehensive understanding of cybersecurity principles, 
+                threat recognition, and their commitment to maintaining secure practices in the digital workplace.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <div class="signature-line"></div>
+            <p class="signature-text">LoophishX Training Authority</p>
+            
+            <div class="validation-info">
+                <p><strong>Certificate ID:</strong> {certificate_id}</p>
+                <p><strong>Validation Code:</strong> {validation_code}</p>
+                <p><strong>Issued:</strong> {issued_date}</p>
+                <p>Verify at: certificate_view.php?action=validate&cert_id={certificate_id}</p>
+            </div>
+        </div>
+        
+        <div class="seal">
+            OFFICIAL<br>SEAL<br>{current_year}
+        </div>
+    </div>
+</body>
+</html>

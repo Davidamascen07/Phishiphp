@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .certificate {
+            background: white;
+            width: 210mm;
+            height: 297mm;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .background-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            background-image: 
+                radial-gradient(circle at 20% 80%, #667eea 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #764ba2 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, #667eea 0%, transparent 50%);
+        }
+        
+        .certificate-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .logo-section {
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .company-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin: 10px 0 5px 0;
+            font-weight: 700;
+        }
+        
+        .company-tagline {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+        
+        .certificate-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 40px 0 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .certificate-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+        
+        .award-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .awarded-to {
+            font-size: 1.1rem;
+            color: #34495e;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+        
+        .recipient-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: #667eea;
+            font-weight: 700;
+            margin: 20px 0;
+            text-transform: capitalize;
+            position: relative;
+        }
+        
+        .recipient-name::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .achievement-description {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            line-height: 1.8;
+            margin: 40px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .module-highlight {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 40px 0;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .detail-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding-top: 30px;
+        }
+        
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            padding: 0 50px;
+        }
+        
+        .signature {
+            text-align: center;
+            position: relative;
+        }
+        
+        .signature-line {
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 0 auto 10px auto;
+        }
+        
+        .signature-title {
+            font-size: 0.9rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .signature-subtitle {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+        
+        .validation-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: #495057;
+            line-height: 1.6;
+        }
+        
+        .validation-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .validation-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+            color: #28a745;
+        }
+        
+        .certificate-id {
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .decorative-border {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            pointer-events: none;
+        }
+        
+        @media print {
+            body { 
+                background: white; 
+                padding: 0;
+                margin: 0;
+            }
+            .certificate { 
+                box-shadow: none;
+                width: 100%;
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="background-pattern"></div>
+        <div class="decorative-border"></div>
+        
+        <div class="certificate-content">
+            <div class="header">
+                <div class="logo-section">
+                    <div class="logo-icon">🛡️</div>
+                    <div class="company-name">LoophishX Security</div>
+                    <div class="company-tagline">Advanced Cybersecurity Training Solutions</div>
+                </div>
+            </div>
+            
+            <h1 class="certificate-title">Certificate</h1>
+            <p class="certificate-subtitle">of Cybersecurity Excellence</p>
+            
+            <div class="award-section">
+                <p class="awarded-to">This certificate is proudly awarded to</p>
+                
+                <div class="recipient-name">{user_name}</div>
+                
+                <p class="achievement-description">
+                    for the successful completion of the comprehensive cybersecurity awareness program 
+                    <span class="module-highlight">"{module_name}"</span> and demonstrating exceptional 
+                    knowledge in threat identification, risk assessment, and security best practices.
+                </p>
+                
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Training Module</div>
+                        <div class="detail-value">{module_name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Achievement Score</div>
+                        <div class="detail-value">{score_achieved}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Completion Date</div>
+                        <div class="detail-value">{completion_date}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Certification Level</div>
+                        <div class="detail-value">{category}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <div class="signatures">
+                    <div class="signature">
+                        <div class="signature-line"></div>
+                        <div class="signature-title">Training Director</div>
+                        <div class="signature-subtitle">LoophishX Security Team</div>
+                    </div>
+                    <div class="signature">
+                        <div class="signature-line"></div>
+                        <div class="signature-title">Date of Issue</div>
+                        <div class="signature-subtitle">{issued_date}</div>
+                    </div>
+                </div>
+                
+                <div class="validation-info">
+                    <div class="validation-title">
+                        <span class="validation-icon">✓</span>
+                        Certificate Authentication
+                    </div>
+                    <div>
+                        <strong>Certificate ID:</strong> <span class="certificate-id">{certificate_id}</span><br>
+                        <strong>Validation Code:</strong> <span class="certificate-id">{validation_code}</span><br>
+                        <strong>Verification URL:</strong> certificate_view.php?action=validate&cert_id={certificate_id}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,14 +16,278 @@
       <!-- Favicon icon -->
       <link rel="icon" type="image/png" sizes="16x16" href="images/favicon.png">
       <title>LooPhish - Dashboard de Campanhas de Email</title>
-      <link rel="stylesheet" type="text/css" href="css/select2.min.css"> 
-      <link rel="stylesheet" type="text/css" href="css/prism.css"/>
+      <!-- Modern CSS Framework -->
       <link rel="stylesheet" type="text/css" href="css/style.min.css">
+      <link rel="stylesheet" type="text/css" href="css/loophish-modern.css">
+      <link rel="stylesheet" type="text/css" href="css/loophish-theme-2025.css">
+      <link rel="stylesheet" type="text/css" href="css/select2.min.css">
+      <link rel="stylesheet" type="text/css" href="css/prism.css"/>
       <link rel="stylesheet" type="text/css" href="css/toastr.min.css">
       <link rel="stylesheet" type="text/css" href="css/dataTables.foundation.min.css">
-      <link rel="stylesheet" type="text/css" href="css/summernote-lite.min.css"> 
+      <link rel="stylesheet" type="text/css" href="css/summernote-lite.min.css">
+      <!-- Material Design Icons -->
+      <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.0.96/css/materialdesignicons.min.css" rel="stylesheet"> 
       <style type="text/css">
          .note-editable { background-color: white !important; } /*Disabled background colour*/
+         
+         /* Dashboard Header Moderno */
+         .dashboard-header {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--border-radius-xl);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+         }
+         
+         .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+         }
+         
+         .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+         }
+         
+         .dashboard-subtitle {
+            opacity: 0.9;
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+         }
+         
+         /* Cards Modernos */
+         .card {
+            background: #fdfdfd;
+            border-radius: var(--border-radius-xl);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition-normal);
+            margin-bottom: 2rem;
+         }
+         
+         .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+         }
+         
+         .card-body {
+            padding: 2rem;
+         }
+         
+         .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1.5rem;
+         }
+         
+         /* Cards de Métricas Modernos */
+         .metric-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+         }
+         
+         .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+         }
+         
+         .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+         }
+         
+         .metric-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            font-family: 'Inter', sans-serif;
+         }
+         
+         .metric-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+         }
+         
+         .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+         }
+         
+         .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+         }
+         
+         .progress {
+            flex: 1;
+            height: 8px;
+            background-color: #f3f4f6;
+            border-radius: 50px;
+            overflow: hidden;
+         }
+         
+         .progress-bar {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.6s ease;
+         }
+         
+         .progress-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            min-width: 40px;
+            text-align: right;
+         }
+         
+         .chart-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+         }
+         
+         /* Tipografia Moderna */
+         .fw-bold {
+            font-weight: 700 !important;
+         }
+         
+         .text-primary {
+            color: var(--primary-color) !important;
+         }
+         
+         /* Cores de Background para Ícones */
+         .bg-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+         }
+         
+         .bg-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+         }
+         
+         .bg-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+         }
+         
+         .bg-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+         }
+         
+         .bg-primary {
+            background: var(--gradient-primary) !important;
+         }
+         
+         /* Grid System Responsivo */
+         .g-3 {
+            gap: 1rem !important;
+         }
+         
+         .g-4 {
+            gap: 1.5rem !important;
+         }
+         
+         .mb-4 {
+            margin-bottom: 1.5rem !important;
+         }
+         
+         .p-4 {
+            padding: 1.5rem !important;
+         }
+         
+         /* Botões Modernos */
+         .btn {
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: var(--transition-normal);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+         }
+         
+         .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+         }
+         
+         .btn-info {
+            background: var(--gradient-primary);
+            border: none;
+         }
+         
+         .page-wrapper {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+         }
+         
+         /* Responsividade */
+         @media (max-width: 768px) {
+            .dashboard-header {
+               padding: 1.5rem;
+            }
+            
+            .dashboard-title {
+               font-size: 2rem;
+            }
+            
+            .card-body {
+               padding: 1.5rem;
+            }
+         }
+         
+         /* Animações suaves */
+         @keyframes fadeInUp {
+            from {
+               opacity: 0;
+               transform: translateY(30px);
+            }
+            to {
+               opacity: 1;
+               transform: translateY(0);
+            }
+         }
+         
+         .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+         }
          
          <?php if ($isPublicView): ?>
          /* Estilos para modo público compartilhado */
@@ -49,7 +313,7 @@
          body::before {
              content: "📊 Dashboard Público - LooPhish (Campanhas de Email)";
              display: block;
-             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             background: var(--gradient-primary);
              color: white;
              padding: 15px 20px;
              margin: 0;
@@ -117,6 +381,11 @@
             <!-- Container fluid  -->
             <!-- ============================================================== -->
             <div class="container-fluid">
+               <!-- Dashboard Header Moderno -->
+               <div class="dashboard-header animate-fadeInUp">
+                  <div class="dashboard-title">Dashboard de Campanhas de Email</div>
+                  <div class="dashboard-subtitle">Análise detalhada e relatórios de campanhas de phishing por email</div>
+               </div>
                <!-- ============================================================== -->
                <!-- Sales Cards  -->
                <!-- ============================================================== -->
@@ -157,27 +426,134 @@
                      </div>
                   </div>
                </div>
-               <div class="row">
-                  <div class="col-md-12">   
+               <!-- Seção de Visão Geral dos Emails -->
+               <div class="row mb-4">
+                  <div class="col-12">
                      <div class="card">
-                        <div class="card-body">     
-                           <div class="align-items-left col-12 d-flex no-block">             
-                              <div class="col-md-3">                             
-                                 <h5 class="card-title text-center"><span>Visão Geral - Email</span></h5> 
-                                 <div id="radialchart_overview_mailcamp" ></div>
+                        <div class="card-body p-4">
+                           <h3 class="mb-4 fw-bold text-primary">📧 Visão Geral dos Emails</h3>
+                           <div class="row g-4">
+                              <!-- Gráfico Circular Email -->
+                              <div class="col-lg-4">
+                                 <div class="chart-container">
+                                    <div id="radialchart_overview_mailcamp" style="min-height: 320px;"></div>
+                                 </div>
                               </div>
-                                 
-                              <div class="col-md-3">    
-                                 <h5 class="card-title text-center"><span>Emails Enviados</span></h5>
-                                 <div id="piechart_mail_total_sent" ></div>
-                              </div>
-                              <div class="col-md-3">
-                                 <h5 class="card-title text-center"><span>Emails Abertos</span></h5>
-                                 <div id="piechart_mail_total_mail_open" ></div>
-                              </div>
-                              <div class="col-md-3">                           
-                                 <h5 class="card-title text-center"><span>Emails Respondidos</span></h5>
-                                 <div id="piechart_mail_total_replied" class="center"></div>
+                              
+                              <!-- Cards de Métricas Email -->
+                              <div class="col-lg-8">
+                                 <div class="row g-3">
+                                    <!-- Card Emails Enviados -->
+                                    <div class="col-md-4">
+                                       <div class="metric-card bg-white">
+                                          <div class="d-flex justify-content-between align-items-start mb-3">
+                                             <div>
+                                                <div class="metric-number text-success" id="metric_emails_sent">0</div>
+                                                <div class="metric-label">Total de Emails Enviados</div>
+                                             </div>
+                                             <div class="metric-icon bg-success">
+                                                <i class="mdi mdi-email-outline"></i>
+                                             </div>
+                                          </div>
+                                          <div class="progress-wrapper">
+                                             <div class="progress">
+                                                <div class="progress-bar bg-success" id="progress_emails_sent" style="width: 0%;"></div>
+                                             </div>
+                                             <span class="progress-text" id="percent_emails_sent">0%</span>
+                                          </div>
+                                          <!-- Gráfico original oculto para manter compatibilidade -->
+                                          <div id="piechart_mail_total_sent" style="display: none;"></div>
+                                       </div>
+                                    </div>
+                                    
+                                    <!-- Card Emails Abertos -->
+                                    <div class="col-md-4">
+                                       <div class="metric-card bg-white">
+                                          <div class="d-flex justify-content-between align-items-start mb-3">
+                                             <div>
+                                                <div class="metric-number text-warning" id="metric_emails_opened">0</div>
+                                                <div class="metric-label">Emails Abertos</div>
+                                             </div>
+                                             <div class="metric-icon bg-warning">
+                                                <i class="mdi mdi-email-open-outline"></i>
+                                             </div>
+                                          </div>
+                                          <div class="progress-wrapper">
+                                             <div class="progress">
+                                                <div class="progress-bar bg-warning" id="progress_emails_opened" style="width: 0%;"></div>
+                                             </div>
+                                             <span class="progress-text" id="percent_emails_opened">0%</span>
+                                          </div>
+                                          <!-- Gráfico original oculto para manter compatibilidade -->
+                                          <div id="piechart_mail_total_mail_open" style="display: none;"></div>
+                                       </div>
+                                    </div>
+                                    
+                                    <!-- Card Respostas -->
+                                    <div class="col-md-4">
+                                       <div class="metric-card bg-white">
+                                          <div class="d-flex justify-content-between align-items-start mb-3">
+                                             <div>
+                                                <div class="metric-number text-danger" id="metric_emails_replied">0</div>
+                                                <div class="metric-label">Respostas a Emails</div>
+                                             </div>
+                                             <div class="metric-icon bg-danger">
+                                                <i class="mdi mdi-reply"></i>
+                                             </div>
+                                          </div>
+                                          <div class="progress-wrapper">
+                                             <div class="progress">
+                                                <div class="progress-bar bg-danger" id="progress_emails_replied" style="width: 0%;"></div>
+                                             </div>
+                                             <span class="progress-text" id="percent_emails_replied">0%</span>
+                                          </div>
+                                          <!-- Gráfico original oculto para manter compatibilidade -->
+                                          <div id="piechart_mail_total_replied" style="display: none;"></div>
+                                       </div>
+                                    </div>
+                                    
+                                    <!-- Card Taxa de Abertura -->
+                                    <div class="col-md-6">
+                                       <div class="metric-card bg-white">
+                                          <div class="d-flex justify-content-between align-items-start mb-3">
+                                             <div>
+                                                <div class="metric-number text-info" id="metric_open_rate">0%</div>
+                                                <div class="metric-label">Taxa de Abertura</div>
+                                             </div>
+                                             <div class="metric-icon bg-info">
+                                                <i class="mdi mdi-chart-line"></i>
+                                             </div>
+                                          </div>
+                                          <div class="progress-wrapper">
+                                             <div class="progress">
+                                                <div class="progress-bar bg-info" id="progress_open_rate" style="width: 0%;"></div>
+                                             </div>
+                                             <span class="progress-text" id="percent_open_rate_display">0%</span>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    
+                                    <!-- Card Taxa de Resposta -->
+                                    <div class="col-md-6">
+                                       <div class="metric-card bg-white">
+                                          <div class="d-flex justify-content-between align-items-start mb-3">
+                                             <div>
+                                                <div class="metric-number text-primary" id="metric_reply_rate">0%</div>
+                                                <div class="metric-label">Taxa de Resposta</div>
+                                             </div>
+                                             <div class="metric-icon bg-primary">
+                                                <i class="mdi mdi-trending-up"></i>
+                                             </div>
+                                          </div>
+                                          <div class="progress-wrapper">
+                                             <div class="progress">
+                                                <div class="progress-bar bg-primary" id="progress_reply_rate" style="width: 0%;"></div>
+                                             </div>
+                                             <span class="progress-text" id="percent_reply_rate_display">0%</span>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -447,6 +823,7 @@
       <script src="js/libs/apexcharts.js"></script>
       <script src="js/common_scripts.js"></script>
       <script src="js/mail_campaign_dashboard.js"></script>
+      <script src="js/dashboard_modern_integration.js"></script>
       <?php
          if(isset($_GET['tk']) && isset($_GET['mcamp']) && amIPublic($_GET['tk'],$_GET['mcamp']) == true)
             echo '<script>

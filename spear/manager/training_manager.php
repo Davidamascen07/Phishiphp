@@ -805,9 +805,8 @@ class TrainingManager {
     }
     
     public function __destruct() {
-        if ($this->db) {
-            $this->db->close();
-        }
+        // Don't close the global connection as it may be used elsewhere
+        // The connection will be closed when the script ends
     }
 
     /**

@@ -287,17 +287,37 @@ function campaignSelected(campaign_id,tracker_id,f_refresh=false) {
             tracker_id: g_tracker_id
         })
     }).done(function (data) {
-        $("#disp_camp_name").text(data.mailcamp_info.campaign_name);
-        $("#disp_web_tracker_name").text(data.webtracker_info.tracker_name);   
-        $('#disp_camp_status').html(camp_status_def[data.mailcamp_info.camp_status]);
-        $('#disp_camp_start').text(data.mailcamp_info.scheduled_time);
-        $('#disp_camp_end').text(data.mailcamp_info.stop_time=='-'?' In-progress':data.mailcamp_info.stop_time);
-        $('#Modal_export_file_name').val(data.mailcamp_info.campaign_name);
-        g_page_count = data.webtracker_info.tracker_step_data.web_forms.count;
-        var tracker_step_data = data.webtracker_info.tracker_step_data;
+        // Verificar se há erro na resposta
+        if(data.error) {
+            toastr.error('Erro ao carregar dados da campanha: ' + data.error);
+            return;
+        }
+        
+        // Verificar se as propriedades essenciais existem
+        if(!data.mailcamp_info || !data.webtracker_info) {
+            toastr.error('Dados da campanha ou rastreador não encontrados');
+            return;
+        }
+        
+        // Seguramente acessar as propriedades
+        $("#disp_camp_name").text(data.mailcamp_info.campaign_name || 'N/A');
+        $("#disp_web_tracker_name").text(data.webtracker_info.tracker_name || 'N/A');   
+        $('#disp_camp_status').html(camp_status_def[data.mailcamp_info.camp_status] || 'N/A');
+        $('#disp_camp_start').text(data.mailcamp_info.scheduled_time || 'N/A');
+        $('#disp_camp_end').text(data.mailcamp_info.stop_time=='-'?' In-progress':(data.mailcamp_info.stop_time || 'N/A'));
+        $('#Modal_export_file_name').val(data.mailcamp_info.campaign_name || 'export');
+        
+        // Verificar se tracker_step_data existe
+        if(data.webtracker_info.tracker_step_data && data.webtracker_info.tracker_step_data.web_forms) {
+            g_page_count = data.webtracker_info.tracker_step_data.web_forms.count;
+            var tracker_step_data = data.webtracker_info.tracker_step_data;
+        } else {
+            g_page_count = 0;
+            var tracker_step_data = {};
+        }
 
         $('#table_campaign_info > tbody > tr:eq(0) > td:eq(1)').text(campaign_id);
-        $('#table_campaign_info > tbody > tr:eq(1) > td:eq(1)').text(data.mailcamp_info.date);
+        $('#table_campaign_info > tbody > tr:eq(1) > td:eq(1)').text(data.mailcamp_info.date || 'N/A');
         $('#table_campaign_info > tbody > tr:eq(2) > td:eq(1)').text(data.mailcamp_info.campaign_data.user_group.name + " (ID :" + data.mailcamp_info.campaign_data.user_group.id + ")");
         $('#table_campaign_info > tboDy > tr:eq(3) > td:eq(1)').text(data.mailcamp_info.campaign_data.mail_template.name + " (ID: " + data.mailcamp_info.campaign_data.mail_template.id + ")");
         $('#table_campaign_info > tbody > tr:eq(4) > td:eq(1)').text(data.mailcamp_info.campaign_data.mail_sender.name + " (ID: " + data.mailcamp_info.campaign_data.mail_sender.id + ")");
@@ -344,15 +364,27 @@ function updateMailCampGraphs(){
         })
     }).done(function (data) {
         if(!data.error){            
-            var sent_failed_count=data.live_mcamp_data.sent_failed_count;
-            var sent_success_count=data.live_mcamp_data.sent_success_count;
-            var sent_mail_count = sent_failed_count + sent_success_count;
-            var mail_open_count = data.live_mcamp_data.mail_open_count;
+            // Verificar se live_mcamp_data existe
+            if(data.live_mcamp_data) {
+                var sent_failed_count = data.live_mcamp_data.sent_failed_count || 0;
+                var sent_success_count = data.live_mcamp_data.sent_success_count || 0;
+                var sent_mail_count = sent_failed_count + sent_success_count;
+                var mail_open_count = data.live_mcamp_data.mail_open_count || 0;
 
-            updateProgressbar(data.camp_status, data.campaign_data.mail_sender.id, data.campaign_data.user_group.id, data.campaign_data.mail_template.id, sent_mail_count, sent_success_count, sent_failed_count, mail_open_count);
+                // Verificar se campaign_data existe
+                if(data.campaign_data && data.campaign_data.mail_sender && data.campaign_data.user_group && data.campaign_data.mail_template) {
+                    updateProgressbar(data.camp_status, data.campaign_data.mail_sender.id, data.campaign_data.user_group.id, data.campaign_data.mail_template.id, sent_mail_count, sent_success_count, sent_failed_count, mail_open_count);
+                } else {
+                    console.warn('Dados da campanha incompletos');
+                }
+            } else {
+                console.warn('live_mcamp_data não encontrado');
+            }
         }
-        else
-            toastr.warning('', data.live_mcamp_data.error);            
+        else {
+            var errorMsg = (data.live_mcamp_data && data.live_mcamp_data.error) ? data.live_mcamp_data.error : (data.error || 'Erro desconhecido');
+            toastr.warning('', errorMsg);            
+        }
     }); 
 }
 
